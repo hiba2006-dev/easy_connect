@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>{{ course.title }} - EasyConnect</title>
+<link rel="stylesheet" href="/static/style.css?v=20260222-learning-course">
+</head>
+<body class="learning-page">
+<div class="page-shell learning-shell">
+    <header>
+        <h1>{{ course.title }}</h1>
+        <div class="top-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/learning">Apprentissage</a>
+            <a href="/auth/logout">Logout</a>
+        </div>
+    </header>
+
+    <section class="learning-hero">
+        <div>
+            <p class="learning-kicker">Cours</p>
+            <h2>{{ course.title }}</h2>
+            <p class="muted">{{ course.description }}</p>
+        </div>
+        <a class="learning-pill" href="/quiz">Aller au quiz</a>
+    </section>
+
+    <div class="panel learning-ai-panel">
+        <h3>Votre progression</h3>
+        <p class="muted">Progression actuelle: {{ course_progress.progress }}%</p>
+        <form method="post" action="/learning/course/{{ course.id }}/progress" class="learning-course-form">
+            <input type="number" name="progress" min="0" max="100" value="{{ course_progress.progress }}" required>
+            <button type="submit">Mettre a jour</button>
+        </form>
+    </div>
+
+    <h2 class="section-title">Objectifs du cours</h2>
+    <div class="cards-grid learning-courses">
+        {% for item in course_content.objectives %}
+        <div class="card learning-card">
+            <p>{{ item }}</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <h2 class="section-title">Lecons</h2>
+    <div class="panel">
+        <ol>
+            {% for lesson in course_content.lessons %}
+            <li>{{ lesson }}</li>
+            {% endfor %}
+        </ol>
+    </div>
+
+    <h2 class="section-title">Pratique recommandee</h2>
+    <div class="panel">
+        <ul>
+            {% for drill in course_content.practice %}
+            <li>{{ drill }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+</body>
+</html>

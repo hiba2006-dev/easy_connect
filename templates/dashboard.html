@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard - EasyConnect</title>
+    <link rel="stylesheet" href="/static/style.css?v=20260222-dashboard">
+</head>
+<body class="dashboard-page">
+<div class="page-shell dashboard-shell">
+    <header>
+        <h1>EasyConnect Dashboard</h1>
+        <div class="top-links">
+            <a href="/community">Communaute</a>
+            <a href="/learning">Apprentissage</a>
+            <a href="/auth/logout">Logout</a>
+        </div>
+    </header>
+
+    <section class="dashboard-hero">
+        <div>
+            <p class="dashboard-kicker">Tableau de bord</p>
+            <h2>Bienvenue {{ user.username }}</h2>
+            <p class="muted">Retrouvez vos activites et continuez votre progression.</p>
+        </div>
+        <div class="dashboard-hero-actions">
+            <a class="dashboard-pill" href="/community">Nouvelle publication</a>
+            <a class="dashboard-pill" href="/learning">Continuer un cours</a>
+        </div>
+    </section>
+
+    <div class="stats-grid dashboard-stats">
+        <div class="card stat-card">
+            <h3>Publications</h3>
+            <span class="metric">{{ stats.posts }}</span>
+            <p class="muted">Messages envoyes dans la communaute.</p>
+        </div>
+        <div class="card stat-card">
+            <h3>Commentaires</h3>
+            <span class="metric">{{ stats.comments }}</span>
+            <p class="muted">Reponses que vous avez ajoutees.</p>
+        </div>
+        <div class="card stat-card">
+            <h3>Cours en cours</h3>
+            <span class="metric">{{ stats.courses }}</span>
+            <p class="muted">Parcours non termines pour le moment.</p>
+        </div>
+    </div>
+
+    <h2 class="section-title">Explorer</h2>
+    <div class="features dashboard-features">
+        <div class="card feature-card">
+            <h3>Espace communautaire</h3>
+            <p class="muted">Publiez des messages et echangez avec les autres membres.</p>
+            <a class="dashboard-link" href="/community">Ouvrir</a>
+        </div>
+        <div class="card feature-card">
+            <h3>Apprentissage</h3>
+            <p class="muted">Continuez vos cours et suivez votre progression.</p>
+            <a class="dashboard-link" href="/learning">Continuer</a>
+        </div>
+        <div class="card feature-card">
+            <h3>Quiz</h3>
+            <p class="muted">Entrainez-vous avec des questions rapides.</p>
+            <a class="dashboard-link" href="/learning">Demarrer</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

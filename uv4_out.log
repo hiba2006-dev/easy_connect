@@ -1,0 +1,2 @@
+INFO:     127.0.0.1:53866 - "POST /auth/login HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:53866 - "GET /dashboard HTTP/1.1" 500 Internal Server Error
