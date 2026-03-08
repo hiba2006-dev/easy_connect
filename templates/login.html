@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Connexion - EasyConnect</title>
+<link rel="stylesheet" href="/static/style.css?v=20260222-auth">
+</head>
+<body class="auth-page">
+
+<div class="form-container">
+<p class="auth-badge">EasyConnect</p>
+<h2>Connexion</h2>
+<p class="auth-subtitle">Connectez-vous pour acceder a votre espace.</p>
+
+<form method="post" action="/auth/login">
+    <input type="text" name="username" placeholder="Nom d'utilisateur ou email" required>
+    <input type="password" name="password" placeholder="Mot de passe" required>
+    <button type="submit">Se connecter</button>
+</form>
+
+{% if error %}
+<p class="form-error">{{ error }}</p>
+{% endif %}
+<p>Pas encore de compte ? <a href="/auth/register">Creer un compte</a></p>
+
+</div>
+
+</body>
+</html>
+

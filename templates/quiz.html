@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Quiz - EasyConnect</title>
+<link rel="stylesheet" href="/static/style.css?v=20260222-quiz">
+</head>
+<body class="quiz-page">
+<div class="page-shell quiz-shell">
+    <header>
+        <h1>Quiz Rapide</h1>
+        <div class="top-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/learning">Apprentissage</a>
+            <a href="/auth/logout">Logout</a>
+        </div>
+    </header>
+
+    <section class="quiz-hero">
+        <div>
+            <p class="quiz-kicker">Quiz</p>
+            <h2>Testez vos connaissances</h2>
+            <p class="muted">Repondez aux questions et suivez votre score en direct.</p>
+        </div>
+    </section>
+
+    <div class="panel quiz-panel">
+        <p id="quiz-progress" class="muted"></p>
+        <h3 id="quiz-question"></h3>
+        <div id="quiz-options" class="quiz-options"></div>
+        <p id="quiz-feedback" class="quiz-feedback"></p>
+        <button id="quiz-next" type="button" class="btn-soft" style="display:none;">Question suivante</button>
+        <button id="quiz-restart" type="button" style="display:none;">Recommencer</button>
+    </div>
+</div>
+
+<script>
+const quizData = [
+    {
+        question: "Quel signe utilise-t-on pour dire BONJOUR en ASL ?",
+        options: ["Main ouverte depuis le front vers l'exterieur", "Poing sur la poitrine", "Index sur les levres"],
+        answer: 0
+    },
+    {
+        question: "Pour epeler un mot en ASL, on utilise principalement :",
+        options: ["L'alphabet manuel", "Les expressions vocales", "Les emojis"],
+        answer: 0
+    },
+    {
+        question: "Quel element est tres important en ASL pour le sens ?",
+        options: ["La couleur des vetements", "Les expressions du visage", "La vitesse de marche"],
+        answer: 1
+    }
+];
+
+let currentIndex = 0;
+let score = 0;
+let locked = false;
+
+const progressEl = document.getElementById("quiz-progress");
+const questionEl = document.getElementById("quiz-question");
+const optionsEl = document.getElementById("quiz-options");
+const feedbackEl = document.getElementById("quiz-feedback");
+const nextBtn = document.getElementById("quiz-next");
+const restartBtn = document.getElementById("quiz-restart");
+
+function renderQuestion() {
+    const item = quizData[currentIndex];
+    locked = false;
+    feedbackEl.textContent = "";
+    nextBtn.style.display = "none";
+    restartBtn.style.display = "none";
+    progressEl.textContent = `Question ${currentIndex + 1} / ${quizData.length}`;
+    questionEl.textContent = item.question;
+    optionsEl.innerHTML = "";
+
+    item.options.forEach((text, idx) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = text;
+        btn.className = "quiz-option-btn";
+        btn.addEventListener("click", () => checkAnswer(idx, btn));
+        optionsEl.appendChild(btn);
+    });
+}
+
+function checkAnswer(selectedIndex, selectedButton) {
+    if (locked) return;
+    locked = true;
+    const item = quizData[currentIndex];
+    const buttons = optionsEl.querySelectorAll("button");
+
+    buttons.forEach((btn, idx) => {
+        if (idx === item.answer) btn.classList.add("correct");
+    });
+
+    if (selectedIndex === item.answer) {
+        score += 1;
+        feedbackEl.textContent = "Bonne reponse.";
+        feedbackEl.className = "quiz-feedback success";
+    } else {
+        selectedButton.classList.add("wrong");
+        feedbackEl.textContent = "Mauvaise reponse.";
+        feedbackEl.className = "quiz-feedback error";
+    }
+
+    if (currentIndex < quizData.length - 1) {
+        nextBtn.style.display = "inline-block";
+    } else {
+        showResult();
+    }
+}
+
+function showResult() {
+    progressEl.textContent = "Quiz termine";
+    questionEl.textContent = `Votre score: ${score}/${quizData.length}`;
+    optionsEl.innerHTML = "";
+    feedbackEl.textContent = "";
+    nextBtn.style.display = "none";
+    restartBtn.style.display = "inline-block";
+}
+
+nextBtn.addEventListener("click", () => {
+    currentIndex += 1;
+    renderQuestion();
+});
+
+restartBtn.addEventListener("click", () => {
+    currentIndex = 0;
+    score = 0;
+    renderQuestion();
+});
+
+renderQuestion();
+</script>
+</body>
+</html>

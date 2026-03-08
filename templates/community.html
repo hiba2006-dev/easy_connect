@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Communaute - EasyConnect</title>
+<link rel="stylesheet" href="/static/style.css?v=20260222-community">
+</head>
+<body class="community-page">
+<div class="page-shell community-shell">
+    <header>
+        <h1>Espace Communaute</h1>
+        <div class="top-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/learning">Apprentissage</a>
+            <a href="/auth/logout">Logout</a>
+        </div>
+    </header>
+
+    <section class="community-hero">
+        <div>
+            <p class="community-kicker">Communaute</p>
+            <h2>Partagez vos idees</h2>
+            <p class="muted">Publiez, commentez, et collaborez avec les autres membres.</p>
+        </div>
+        <a class="community-pill" href="#new-post">Ecrire un post</a>
+    </section>
+
+    <h2 class="section-title" id="new-post">Nouveau message</h2>
+    <div class="panel community-compose">
+        <form method="post" action="/community/posts/create">
+            <input type="text" name="title" placeholder="Titre" required>
+            <textarea name="content" placeholder="Ecrivez votre message..." required></textarea>
+            <button type="submit">Publier</button>
+        </form>
+    </div>
+
+    <h2 class="section-title">Publications recentes</h2>
+    <div class="posts-list community-feed">
+        {% for post in posts %}
+        <article class="post-item community-post">
+            <h3>{{ post.title }}</h3>
+            <p>{{ post.content }}</p>
+            <p class="post-meta">Auteur: {{ post.author.username if post.author else "Anonyme" }}</p>
+
+            <form method="post" action="/community/posts/{{ post.id }}/comment" class="stack community-comment-form">
+                <input type="text" name="content" placeholder="Ajouter un commentaire" required>
+                <button class="btn-soft" type="submit">Commenter</button>
+            </form>
+        </article>
+        {% else %}
+        <div class="post-item">
+            <p class="muted">Aucune publication pour le moment.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+</body>
+</html>
