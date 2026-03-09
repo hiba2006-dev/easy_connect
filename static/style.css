@@ -119,6 +119,7 @@ header h1 {
     letter-spacing: -0.02em;
 }
 
+
 .top-links {
     display: flex;
     gap: 12px;
@@ -315,6 +316,56 @@ button:active {
 }
 
 /* Card Enhancement */
+/* ──────────────── FIX FOR YOUR COURSE CARDS ──────────────── */
+.cards-grid.learning-courses {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+    margin-top: 16px;
+}
+
+.learning-card {
+    background: linear-gradient(160deg, var(--surface), var(--bg-1));
+    border: 1px solid var(--border);
+    border-left: 4px solid rgba(37, 99, 235, 0.45); /* kept your accent */
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-base);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.learning-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--secondary-light);
+}
+
+.learning-card h3 {
+    font-size: 1.25rem;
+    margin: 0 0 8px 0;
+    font-weight: 700;
+}
+
+.learning-card .muted {
+    margin: 0 0 12px 0;
+}
+
+.learning-card form {
+    margin-top: auto;           /* pushes button to bottom */
+}
+
+.learning-card button {
+    width: 100%;
+    padding: 14px;
+    font-size: 1rem;
+}
+
+/* ────────────────────────────────────────────────────────── */
+
+/* Card Enhancement (general - kept for other pages) */
 .card {
     background: linear-gradient(160deg, var(--surface), var(--bg-1));
     border: 1px solid var(--border);
@@ -532,6 +583,7 @@ hr {
     margin-top: 20px;
 }
 
+
 /* Dashboard only */
 .dashboard-page {
     background:
@@ -673,6 +725,85 @@ hr {
     min-height: 150px;
 }
 
+.community-compose input[type="file"] {
+    border: 1px dashed rgba(37, 99, 235, 0.35);
+    background: #f8fbff;
+    padding: 10px 12px;
+}
+
+.community-compose {
+    position: relative;
+    overflow: hidden;
+}
+
+.community-compose::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 2% 4%, rgba(37, 99, 235, 0.08), transparent 28%),
+        radial-gradient(circle at 92% 10%, rgba(15, 118, 110, 0.08), transparent 30%);
+    pointer-events: none;
+}
+
+.community-compose-form {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: 14px;
+}
+
+.community-compose-form input[name="title"] {
+    font-size: 1.02rem;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.92);
+}
+
+.community-compose-form textarea[name="content"] {
+    min-height: 170px;
+    font-size: 1rem;
+    line-height: 1.65;
+    background: rgba(255, 255, 255, 0.95);
+}
+
+.community-compose-form input[type="file"] {
+    border: 1px dashed rgba(37, 99, 235, 0.38);
+    border-radius: 12px;
+    background: rgba(234, 241, 255, 0.55);
+    padding: 10px 12px;
+    color: #24384f;
+}
+
+.community-compose-form input[type="file"]:hover {
+    border-color: rgba(37, 99, 235, 0.55);
+    background: rgba(234, 241, 255, 0.82);
+}
+
+.community-compose-form input[type="file"]::file-selector-button {
+    border: 0;
+    border-radius: 10px;
+    padding: 8px 12px;
+    margin-right: 10px;
+    font-weight: 800;
+    color: #0f3b7a;
+    background: linear-gradient(120deg, #dbeafe, #bfdbfe);
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.community-compose-form input[type="file"]::file-selector-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 12px rgba(37, 99, 235, 0.18);
+}
+
+.community-compose-form button[type="submit"] {
+    padding: 13px 20px;
+    border-radius: 14px;
+    font-size: 1.05rem;
+    letter-spacing: 0.01em;
+    box-shadow: 0 12px 24px rgba(37, 99, 235, 0.26);
+}
+
 .community-feed {
     gap: 14px;
 }
@@ -680,15 +811,75 @@ hr {
 .community-post {
     border-left: 4px solid rgba(15, 118, 110, 0.45);
     padding: 18px;
+    background: linear-gradient(160deg, #ffffff, #f7fbff);
+    box-shadow: 0 12px 28px rgba(15, 34, 56, 0.08);
 }
 
 .community-post h3 {
-    margin-bottom: 6px;
+    margin-bottom: 4px;
 }
 
 .community-comment-form {
     margin-top: 10px;
     gap: 10px;
+}
+
+.community-post-head {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.community-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    color: #0c4a6e;
+    background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+    border: 1px solid rgba(37, 99, 235, 0.25);
+    flex-shrink: 0;
+}
+
+.community-post-content {
+    margin: 8px 0 14px;
+    line-height: 1.65;
+}
+
+.community-post-image {
+    width: 100%;
+    max-height: 420px;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 1px solid rgba(37, 99, 235, 0.18);
+    margin: 0 0 14px;
+    display: block;
+}
+
+.community-comments {
+    display: grid;
+    gap: 8px;
+    margin: 0 0 12px;
+}
+
+.community-comment-item {
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: #f5f9ff;
+    border: 1px solid rgba(37, 99, 235, 0.16);
+}
+
+.community-comment-item p {
+    margin: 4px 0 0;
+}
+
+.community-comment-author {
+    font-weight: 800;
+    color: #1d4ed8;
+    font-size: 0.9rem;
 }
 
 /* Learning only */
@@ -751,10 +942,70 @@ hr {
 
 .learning-card {
     border-left: 4px solid rgba(37, 99, 235, 0.45);
+    gap: 16px;   /* kept but no longer needed as main rule — can remove if you want */
 }
 
 .learning-course-form {
     margin-top: 8px;
+}
+
+.learning-shell .learning-card {
+    overflow: hidden;
+}
+
+.learning-shell .learning-card img:not(.learning-slide-media) {
+    display: block;
+    width: 100%;
+    max-width: 180px;
+    max-height: 180px;
+    height: auto;
+    object-fit: contain;
+    margin: 0 auto;
+}
+
+.learning-shell .learning-card img.asl-letter-gif {
+    width: auto !important;
+    max-width: 130px !important;
+    max-height: 130px !important;
+}
+
+.learning-shell #slide-view .learning-card {
+    gap: 18px;
+}
+
+.learning-slide-media-wrap {
+    width: min(100%, 760px);
+    margin: 8px auto 0;
+    padding: 14px;
+    border: 1px solid rgba(37, 99, 235, 0.2);
+    border-radius: var(--radius-md);
+    background: linear-gradient(160deg, #f9fcff, #eef5ff);
+    box-shadow: var(--shadow-sm);
+}
+
+.learning-slide-media {
+    display: block;
+    width: min(100%, 760px) !important;
+    max-width: 760px !important;
+    max-width: none;
+    max-height: none;
+    height: clamp(340px, 52vw, 520px) !important;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 10px;
+    margin: 0 auto;
+}
+
+.learning-slide-video {
+    display: block;
+    width: min(100%, 860px);
+    aspect-ratio: 16 / 9;
+    height: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    margin: 10px auto 0;
+    box-shadow: var(--shadow-sm);
+    background: #000;
 }
 
 .learning-ai-panel {
@@ -880,6 +1131,49 @@ hr {
     background: #fdecec;
 }
 
+.quiz-option-gif {
+    width: 160px;
+    height: 160px;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
+}
+
+.quiz-option-gif video,
+video.quiz-option-gif {
+    background: #000;
+    border-radius: 10px;
+}
+
+.quiz-prompt-gif {
+    grid-column: 1 / -1;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: #f6f9ff;
+}
+
+.quiz-prompt-gif-img {
+    width: min(100%, 420px);
+    height: 240px;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
+}
+
+.quiz-prompt-gif-img video,
+video.quiz-prompt-gif-img {
+    background: #000;
+    border-radius: 10px;
+}
+
+.quiz-option-text {
+    text-align: center;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    min-height: 60px;
+}
+
 .quiz-feedback {
     min-height: 20px;
     font-weight: 700;
@@ -901,6 +1195,11 @@ hr {
         grid-template-columns: repeat(2, 1fr);
         gap: 16px;
     }
+
+    .cards-grid.learning-courses {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
     
     .section-title {
         font-size: 1.5rem;
@@ -916,9 +1215,17 @@ hr {
         align-items: flex-start;
     }
 
+    .dashboard-hero,
+    .community-hero,
     .learning-hero {
         flex-direction: column;
         align-items: flex-start;
+    }
+
+    .learning-slide-media {
+        width: min(100%, 680px) !important;
+        max-width: 680px !important;
+        height: clamp(280px, 50vw, 430px) !important;
     }
 }
 
@@ -927,6 +1234,12 @@ hr {
     .features,
     .cards-grid {
         grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .cards-grid.learning-courses {
+        grid-template-columns: 1fr;
+        gap: 14px;
     }
     
     :root {
@@ -957,8 +1270,19 @@ hr {
         font-size: 2rem;
     }
     
-    .card {
+    .card,
+    .learning-card {
         padding: 20px;
+    }
+
+    .learning-slide-media-wrap {
+        padding: 10px;
+    }
+
+    .learning-slide-media {
+        width: min(100%, 100%) !important;
+        max-width: none !important;
+        height: clamp(240px, 64vw, 340px) !important;
     }
 }
 
@@ -977,7 +1301,8 @@ hr {
     
     .card,
     .panel,
-    .form-container {
+    .form-container,
+    .learning-card {
         box-shadow: none;
         border: 1px solid #ddd;
         background: white;

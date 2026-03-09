@@ -41,6 +41,7 @@ class PostCreate(PostBase):
 class PostResponse(PostBase):
     id: int
     author_id: int
+    image_url: Optional[str] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
     author: UserResponse

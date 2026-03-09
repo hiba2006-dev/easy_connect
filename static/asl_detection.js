@@ -20,6 +20,11 @@
         return;
     }
 
+    if (typeof Hands === "undefined" || typeof Camera === "undefined" || typeof drawConnectors === "undefined" || typeof drawLandmarks === "undefined") {
+        resultEl.textContent = "Detection error: AI libraries not loaded (check internet/CDN).";
+        return;
+    }
+
     const ctx = canvas.getContext("2d");
     let camera = null;
     let running = false;
@@ -75,7 +80,7 @@
 
     function updateCalibrationInfo() {
         const parts = LETTERS.map((l) => `${l}:${dataset[l].length}`);
-        infoEl.textContent = `Exemples captures -> ${parts.join(" | ")}`;
+        infoEl.textContent = `Captured samples -> ${parts.join(" | ")}`;
     }
 
     function fillLetters() {
@@ -196,9 +201,10 @@
 
     hands.setOptions({
         maxNumHands: 1,
-        modelComplexity: 1,
-        minDetectionConfidence: 0.6,
-        minTrackingConfidence: 0.6,
+        modelComplexity: 0,
+        selfieMode: true,
+        minDetectionConfidence: 0.35,
+        minTrackingConfidence: 0.35,
     });
 
     hands.onResults((results) => {
@@ -207,7 +213,7 @@
 
         if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
             lastLandmarks = null;
-            resultEl.textContent = "Signe detecte: --";
+            resultEl.textContent = "Detected sign: -- (no hand detected)";
             return;
         }
 
@@ -220,7 +226,7 @@
         const raw = predictKnn(vec, 5);
         const pred = smoothPrediction(raw);
         const pct = Math.round(pred.confidence * 100);
-        resultEl.textContent = `Signe detecte: ${pred.label} (${pct}%)`;
+        resultEl.textContent = `Detected sign: ${pred.label} (${pct}%)`;
     });
 
     async function startDetection() {
@@ -236,9 +242,10 @@
             });
             running = true;
             await camera.start();
+            resultEl.textContent = "Camera active. Keep your hand visible in the frame.";
         } catch {
             running = false;
-            resultEl.textContent = "Erreur camera: autorisation refusee ou camera indisponible.";
+            resultEl.textContent = "Camera error: permission denied or camera unavailable.";
         }
     }
 
@@ -250,12 +257,12 @@
         }
         smoothWindow.length = 0;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        resultEl.textContent = "Signe detecte: --";
+        resultEl.textContent = "Detected sign: --";
     }
 
     function captureSample() {
         if (!lastLandmarks) {
-            resultEl.textContent = "Signe detecte: -- (aucune main detectee)";
+            resultEl.textContent = "Detected sign: -- (no hand detected)";
             return;
         }
         const letter = letterSelect.value;
@@ -264,14 +271,14 @@
         // Prevent adding near-identical sample already used by another letter.
         const nearestOther = nearestDistance(vec, (l) => l !== letter);
         if (Number.isFinite(nearestOther) && nearestOther < 0.08) {
-            resultEl.textContent = `Signe detecte: -- (capture refusee: trop proche de ${letter} mais aussi d'une autre lettre, changez la pose)`;
+            resultEl.textContent = `Detected sign: -- (capture rejected: too close to another letter, change the pose)`;
             return;
         }
 
         // Prevent duplicate spam for same letter.
         const nearestSame = nearestDistance(vec, (l) => l === letter);
         if (Number.isFinite(nearestSame) && nearestSame < 0.02) {
-            resultEl.textContent = `Signe detecte: -- (capture refusee: doublon ${letter})`;
+            resultEl.textContent = `Detected sign: -- (capture rejected: duplicate ${letter})`;
             return;
         }
 
@@ -281,7 +288,7 @@
         }
         saveDataset();
         updateCalibrationInfo();
-        resultEl.textContent = `Signe detecte: -- (exemple ${letter} enregistre)`;
+        resultEl.textContent = `Detected sign: -- (saved sample for ${letter})`;
     }
 
     function clearSamples() {
@@ -347,9 +354,9 @@
         if (!file) return;
         try {
             await handleImportFile(file);
-            resultEl.textContent = "Signe detecte: -- (calibration importee)";
+            resultEl.textContent = "Detected sign: -- (calibration imported)";
         } catch {
-            resultEl.textContent = "Signe detecte: -- (echec import JSON)";
+            resultEl.textContent = "Detected sign: -- (JSON import failed)";
         } finally {
             importFile.value = "";
         }
@@ -361,7 +368,7 @@
         const loadedGlobal = await loadGlobalDataset();
         updateCalibrationInfo();
         if (loadedGlobal) {
-            resultEl.textContent = "Signe detecte: -- (calibration globale chargee)";
+            resultEl.textContent = "Detected sign: -- (global calibration loaded)";
         }
     }
 

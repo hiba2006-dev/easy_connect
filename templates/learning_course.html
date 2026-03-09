@@ -2,7 +2,7 @@
 <html>
 <head>
 <title>{{ course.title }} - EasyConnect</title>
-<link rel="stylesheet" href="/static/style.css?v=20260222-learning-course">
+<link rel="stylesheet" href="/static/style.css?v=20260309-no-logo">
 </head>
 <body class="learning-page">
 <div class="page-shell learning-shell">
@@ -10,55 +10,156 @@
         <h1>{{ course.title }}</h1>
         <div class="top-links">
             <a href="/dashboard">Dashboard</a>
-            <a href="/learning">Apprentissage</a>
+            <a href="/learning">Learning</a>
             <a href="/auth/logout">Logout</a>
         </div>
     </header>
 
     <section class="learning-hero">
         <div>
-            <p class="learning-kicker">Cours</p>
+            <p class="learning-kicker">Course</p>
             <h2>{{ course.title }}</h2>
             <p class="muted">{{ course.description }}</p>
         </div>
-        <a class="learning-pill" href="/quiz">Aller au quiz</a>
+        <a class="learning-pill" href="/quiz">Go to quiz</a>
     </section>
 
     <div class="panel learning-ai-panel">
-        <h3>Votre progression</h3>
-        <p class="muted">Progression actuelle: {{ course_progress.progress }}%</p>
-        <form method="post" action="/learning/course/{{ course.id }}/progress" class="learning-course-form">
-            <input type="number" name="progress" min="0" max="100" value="{{ course_progress.progress }}" required>
-            <button type="submit">Mettre a jour</button>
-        </form>
+        <h3>Your progress</h3>
+        <p class="muted" id="progress-value">Current progress: {{ course_progress.progress }}%</p>
+        <p class="muted">Go through the slides. Progress updates automatically for each viewed step.</p>
     </div>
 
-    <h2 class="section-title">Objectifs du cours</h2>
-    <div class="cards-grid learning-courses">
-        {% for item in course_content.objectives %}
-        <div class="card learning-card">
-            <p>{{ item }}</p>
+    {% if course_items %}
+    <h2 class="section-title">Interactive Path</h2>
+    <div class="panel stack" id="course-slider">
+        <p class="muted" id="slide-counter"></p>
+        <div id="slide-view"></div>
+        <div class="inline">
+            <button type="button" id="slide-prev" class="btn-soft">Previous</button>
+            <button type="button" id="slide-next">Next</button>
         </div>
-        {% endfor %}
     </div>
+    {% endif %}
 
-    <h2 class="section-title">Lecons</h2>
-    <div class="panel">
-        <ol>
-            {% for lesson in course_content.lessons %}
-            <li>{{ lesson }}</li>
-            {% endfor %}
-        </ol>
-    </div>
-
-    <h2 class="section-title">Pratique recommandee</h2>
-    <div class="panel">
-        <ul>
-            {% for drill in course_content.practice %}
-            <li>{{ drill }}</li>
-            {% endfor %}
-        </ul>
-    </div>
 </div>
+{% if course_items %}
+<script id="course-items-data" type="application/json">{{ course_items | tojson }}</script>
+{% endif %}
+<script>
+(() => {
+    const dataEl = document.getElementById("course-items-data");
+    if (!dataEl) return;
+    const items = JSON.parse(dataEl.textContent || "[]");
+    if (!Array.isArray(items) || items.length === 0) return;
+
+    const counterEl = document.getElementById("slide-counter");
+    const viewEl = document.getElementById("slide-view");
+    const prevBtn = document.getElementById("slide-prev");
+    const nextBtn = document.getElementById("slide-next");
+    const progressEl = document.getElementById("progress-value");
+    const nextCourseUrl = "{{ next_course_url }}";
+    const assetVersion = Date.now();
+    const withAssetVersion = (url) => {
+        if (!url) return url;
+        return `${url}${url.includes("?") ? "&" : "?"}v=${assetVersion}`;
+    };
+    const isVideoMedia = (url) => {
+        if (!url) return false;
+        const clean = url.split("?")[0].toLowerCase();
+        return clean.endsWith(".mp4") || clean.endsWith(".webm") || clean.endsWith(".ogg");
+    };
+    const toMp4Candidate = (url) => {
+        if (!url) return url;
+        const clean = url.split("?")[0];
+        if (clean.toLowerCase().endsWith(".mp4")) return withAssetVersion(clean);
+        return withAssetVersion(clean.replace(/\.(gif|png|jpe?g|webp)$/i, ".mp4"));
+    };
+    let currentIndex = 0;
+    const completedSet = new Set(items.filter((i) => i.done).map((i) => i.item_id));
+
+    const renderSlide = async () => {
+        const item = items[currentIndex];
+        if (!item || !viewEl || !counterEl || !prevBtn || !nextBtn) return;
+
+        counterEl.textContent = `Step ${currentIndex + 1} / ${items.length} - ${item.section}`;
+        prevBtn.disabled = currentIndex === 0;
+        const isLast = currentIndex === items.length - 1;
+        nextBtn.disabled = false;
+        nextBtn.textContent = isLast
+            ? (nextCourseUrl === "/learning" ? "Finish" : "Finish and next course")
+            : "Next";
+
+        let mediaHtml = "";
+        if (item.kind === "image" && item.media_url) {
+            const src = withAssetVersion(item.media_url);
+            const fallbackMp4 = toMp4Candidate(item.media_url);
+            mediaHtml = `
+                <div class="learning-slide-media-wrap">
+                    ${
+                        isVideoMedia(item.media_url)
+                            ? `<video class="learning-slide-media" src="${src}" autoplay loop muted playsinline controls></video>`
+                            : `<img class="learning-slide-media" src="${src}" alt="${item.title}" onerror="this.onerror=null; const v=document.createElement('video'); v.className='learning-slide-media'; v.src='${fallbackMp4}'; v.autoplay=true; v.loop=true; v.muted=true; v.playsInline=true; v.controls=true; this.replaceWith(v);">`
+                    }
+                </div>
+            `;
+        } else if (item.kind === "video" && item.media_url) {
+            mediaHtml = `
+                <iframe class="learning-slide-video" src="${item.media_url}" title="ASL slide video"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                ${item.watch_url ? `<p style="margin-top:10px;"><a href="${item.watch_url}" target="_blank" rel="noopener noreferrer">Open video on YouTube</a></p>` : ""}
+            `;
+        }
+
+        viewEl.innerHTML = `
+            <div class="card learning-card">
+                <p class="muted">${item.section}</p>
+                <h3>${item.title || ""}</h3>
+                <p>${item.text || ""}</p>
+                ${mediaHtml}
+            </div>
+        `;
+
+        if (!completedSet.has(item.item_id)) {
+            try {
+                const res = await fetch("/learning/course/{{ course.id }}/item", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ item_id: item.item_id, completed: true }),
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    completedSet.add(item.item_id);
+                    if (progressEl && typeof data.progress === "number") {
+                        progressEl.textContent = `Current progress: ${data.progress}%`;
+                    }
+                }
+            } catch (err) {
+                // No UI block: user can continue slides even if save fails temporarily.
+            }
+        }
+    };
+
+    prevBtn?.addEventListener("click", async () => {
+        if (currentIndex > 0) {
+            currentIndex -= 1;
+            await renderSlide();
+        }
+    });
+
+    nextBtn?.addEventListener("click", async () => {
+        if (currentIndex < items.length - 1) {
+            currentIndex += 1;
+            await renderSlide();
+            return;
+        }
+        window.location.href = nextCourseUrl || "/learning";
+    });
+
+    renderSlide();
+})();
+</script>
 </body>
 </html>
+

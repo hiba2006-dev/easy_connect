@@ -1,68 +1,68 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Apprentissage - EasyConnect</title>
-<link rel="stylesheet" href="/static/style.css?v=20260222-learning">
+<title>Learning - EasyConnect</title>
+<link rel="stylesheet" href="/static/style.css?v=20260309-no-logo">
 </head>
 <body class="learning-page">
 <div class="page-shell learning-shell">
     <header>
-        <h1>Apprentissage</h1>
+        <h1>Learning</h1>
         <div class="top-links">
             <a href="/dashboard">Dashboard</a>
-            <a href="/community">Communaute</a>
+            <a href="/community">Community</a>
             <a href="/auth/logout">Logout</a>
         </div>
     </header>
 
     <section class="learning-hero">
         <div>
-            <p class="learning-kicker">Apprentissage</p>
-            <h2>Continuez votre progression</h2>
-            <p class="muted">Choisissez un cours, suivez vos avancees et testez la detection IA.</p>
+            <p class="learning-kicker">Learning</p>
+            <h2>Keep improving your skills</h2>
+            <p class="muted">Choose a course, track your progress, and test AI hand detection.</p>
         </div>
-        <a class="learning-pill" href="#courses">Voir les cours</a>
+        <a class="learning-pill" href="#courses">View courses</a>
     </section>
 
-    <h2 class="section-title" id="courses">Cours disponibles</h2>
+    <h2 class="section-title" id="courses">Available courses</h2>
     <div class="cards-grid learning-courses">
         {% for course in courses %}
         <div class="card learning-card">
             <h3>{{ course.title }}</h3>
             <p class="muted">{{ course.description }}</p>
             <form method="post" action="/learning/course/{{ course.id }}/start" class="learning-course-form">
-                <button type="submit">Commencer</button>
+                <button type="submit">Start</button>
             </form>
             {% if progress.get(course.id) %}
             <div class="course-progress">
-                Progression: {{ progress.get(course.id).progress }}%
+                Progress: {{ progress.get(course.id).progress }}%
             </div>
             {% endif %}
         </div>
         {% endfor %}
     </div>
 
-    <h2 class="section-title">Detection IA</h2>
+    <h2 class="section-title">AI Detection</h2>
     <div class="panel stack learning-ai-panel">
-        <p class="muted">Detection A-Z par calibration: capturez quelques exemples pour chaque lettre, puis lancez la prediction en direct.</p>
+        <p class="muted">A-Z detection by calibration: capture a few samples for each letter, then run live prediction.</p>
         <div class="ai-camera-wrap">
             <video id="camera" autoplay playsinline></video>
             <canvas id="camera-overlay"></canvas>
         </div>
-        <p id="ai-result" class="ai-result">Signe detecte: --</p>
+        <p id="ai-result" class="ai-result">Detected sign: --</p>
         <div class="ai-calibration">
-            <label for="calibration-letter">Lettre:</label>
+            <label for="calibration-letter">Letter:</label>
             <select id="calibration-letter"></select>
-            <button id="capture-sample" type="button" class="btn-soft">Capturer un exemple</button>
-            <button id="clear-samples" type="button" class="btn-soft">Effacer calibration</button>
-            <button id="export-samples" type="button" class="btn-soft">Exporter JSON</button>
-            <button id="import-samples" type="button" class="btn-soft">Importer JSON</button>
+            <button id="capture-sample" type="button" class="btn-soft">Capture sample</button>
+            <button id="clear-samples" type="button" class="btn-soft">Clear calibration</button>
+            <button id="export-samples" type="button" class="btn-soft">Export JSON</button>
+            <button id="import-samples" type="button" class="btn-soft">Import JSON</button>
             <input id="import-samples-file" type="file" accept="application/json" style="display:none;">
         </div>
-        <p id="ai-calibration-info" class="muted">Aucun exemple capture.</p>
+        <p id="ai-calibration-info" class="muted">No samples captured.</p>
         <div class="inline">
-            <button id="start-detection" type="button">Demarrer la camera</button>
-            <button id="stop-detection" type="button" class="btn-soft">Arreter</button>
+            <button id="start-detection" type="button">Start camera</button>
+            <button id="stop-detection" type="button" class="btn-soft">Stop</button>
         </div>
     </div>
 </div>
@@ -72,3 +72,4 @@
 <script src="/static/asl_detection.js?v=20260222-azcalib-global"></script>
 </body>
 </html>
+

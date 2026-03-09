@@ -7,10 +7,12 @@ from sqlalchemy.orm import sessionmaker
 
 
 def _build_database_url() -> str:
-    # Default target: MySQL (phpMyAdmin stack)
+    # MySQL only: this app is configured to use phpMyAdmin/MySQL stack.
     db_driver = os.getenv("DB_DRIVER", "mysql").lower()
-    if db_driver == "sqlite":
-        return "sqlite:///./easyconnect.db"
+    if db_driver != "mysql":
+        raise RuntimeError(
+            "Unsupported DB_DRIVER. This project is configured for MySQL only."
+        )
 
     db_user = os.getenv("MYSQL_USER", "root")
     db_password = quote_plus(os.getenv("MYSQL_PASSWORD", ""))
@@ -26,17 +28,10 @@ def _build_database_url() -> str:
 
 SQLALCHEMY_DATABASE_URL = _build_database_url()
 
-if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
-    engine = create_engine(
-        SQLALCHEMY_DATABASE_URL,
-        connect_args={"check_same_thread": False},
-        pool_pre_ping=True,
-    )
-else:
-    engine = create_engine(
-        SQLALCHEMY_DATABASE_URL,
-        pool_pre_ping=True,
-    )
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL,
+    pool_pre_ping=True,
+)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()

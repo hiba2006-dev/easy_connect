@@ -1,57 +1,83 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Communaute - EasyConnect</title>
-<link rel="stylesheet" href="/static/style.css?v=20260222-community">
+<title>Community - EasyConnect</title>
+<link rel="stylesheet" href="/static/style.css?v=20260309-no-logo">
 </head>
 <body class="community-page">
 <div class="page-shell community-shell">
     <header>
-        <h1>Espace Communaute</h1>
+        <h1>Community Space</h1>
         <div class="top-links">
             <a href="/dashboard">Dashboard</a>
-            <a href="/learning">Apprentissage</a>
+            <a href="/learning">Learning</a>
             <a href="/auth/logout">Logout</a>
         </div>
     </header>
 
     <section class="community-hero">
         <div>
-            <p class="community-kicker">Communaute</p>
-            <h2>Partagez vos idees</h2>
-            <p class="muted">Publiez, commentez, et collaborez avec les autres membres.</p>
+            <p class="community-kicker">Community</p>
+            <h2>Share your ideas</h2>
+            <p class="muted">Post, comment, and collaborate with other members.</p>
         </div>
-        <a class="community-pill" href="#new-post">Ecrire un post</a>
+        <a class="community-pill" href="#new-post">Write a post</a>
     </section>
 
-    <h2 class="section-title" id="new-post">Nouveau message</h2>
+    <h2 class="section-title" id="new-post">New post</h2>
     <div class="panel community-compose">
-        <form method="post" action="/community/posts/create">
-            <input type="text" name="title" placeholder="Titre" required>
-            <textarea name="content" placeholder="Ecrivez votre message..." required></textarea>
-            <button type="submit">Publier</button>
+        <form method="post" action="/community/posts/create" enctype="multipart/form-data" class="community-compose-form">
+            <input type="text" name="title" placeholder="Post title" required>
+            <textarea name="content" placeholder="Write your message..." required></textarea>
+            <input type="file" name="image" accept="image/*">
+            <button type="submit">Publish</button>
         </form>
     </div>
 
-    <h2 class="section-title">Publications recentes</h2>
+    <h2 class="section-title">Recent posts</h2>
     <div class="posts-list community-feed">
         {% for post in posts %}
         <article class="post-item community-post">
-            <h3>{{ post.title }}</h3>
-            <p>{{ post.content }}</p>
-            <p class="post-meta">Auteur: {{ post.author.username if post.author else "Anonyme" }}</p>
+            <div class="community-post-head">
+                <div class="community-avatar">
+                    {{ (post.author.username[0] if post.author and post.author.username else "A") | upper }}
+                </div>
+                <div>
+                    <h3>{{ post.title }}</h3>
+                    <p class="post-meta">
+                        By {{ post.author.username if post.author else "Anonymous" }}
+                        • {{ post.comments|length }} comment{{ "" if post.comments|length == 1 else "s" }}
+                    </p>
+                </div>
+            </div>
+            <p class="community-post-content">{{ post.content }}</p>
+            {% if post.image_url %}
+            <img src="{{ post.image_url }}" alt="Post image" class="community-post-image">
+            {% endif %}
+
+            {% if post.comments %}
+            <div class="community-comments">
+                {% for comment in post.comments|sort(attribute='created_at') %}
+                <div class="community-comment-item">
+                    <span class="community-comment-author">{{ comment.author.username if comment.author else "Anonymous" }}</span>
+                    <p>{{ comment.content }}</p>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
 
             <form method="post" action="/community/posts/{{ post.id }}/comment" class="stack community-comment-form">
-                <input type="text" name="content" placeholder="Ajouter un commentaire" required>
-                <button class="btn-soft" type="submit">Commenter</button>
+                <input type="text" name="content" placeholder="Add a comment" required>
+                <button class="btn-soft" type="submit">Comment</button>
             </form>
         </article>
         {% else %}
         <div class="post-item">
-            <p class="muted">Aucune publication pour le moment.</p>
+            <p class="muted">No posts yet.</p>
         </div>
         {% endfor %}
     </div>
 </div>
 </body>
 </html>
+

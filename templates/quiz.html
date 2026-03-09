@@ -2,15 +2,15 @@
 <html>
 <head>
 <title>Quiz - EasyConnect</title>
-<link rel="stylesheet" href="/static/style.css?v=20260222-quiz">
+<link rel="stylesheet" href="/static/style.css?v=20260309-no-logo">
 </head>
 <body class="quiz-page">
 <div class="page-shell quiz-shell">
     <header>
-        <h1>Quiz Rapide</h1>
+        <h1>Quick Quiz</h1>
         <div class="top-links">
             <a href="/dashboard">Dashboard</a>
-            <a href="/learning">Apprentissage</a>
+            <a href="/learning">Learning</a>
             <a href="/auth/logout">Logout</a>
         </div>
     </header>
@@ -18,8 +18,8 @@
     <section class="quiz-hero">
         <div>
             <p class="quiz-kicker">Quiz</p>
-            <h2>Testez vos connaissances</h2>
-            <p class="muted">Repondez aux questions et suivez votre score en direct.</p>
+            <h2>Test your knowledge</h2>
+            <p class="muted">Answer the questions and track your score live.</p>
         </div>
     </section>
 
@@ -28,29 +28,144 @@
         <h3 id="quiz-question"></h3>
         <div id="quiz-options" class="quiz-options"></div>
         <p id="quiz-feedback" class="quiz-feedback"></p>
-        <button id="quiz-next" type="button" class="btn-soft" style="display:none;">Question suivante</button>
-        <button id="quiz-restart" type="button" style="display:none;">Recommencer</button>
+        <button id="quiz-next" type="button" class="btn-soft" style="display:none;">Next question</button>
+        <button id="quiz-restart" type="button" style="display:none;">Restart</button>
     </div>
 </div>
 
 <script>
-const quizData = [
-    {
-        question: "Quel signe utilise-t-on pour dire BONJOUR en ASL ?",
-        options: ["Main ouverte depuis le front vers l'exterieur", "Poing sur la poitrine", "Index sur les levres"],
-        answer: 0
-    },
-    {
-        question: "Pour epeler un mot en ASL, on utilise principalement :",
-        options: ["L'alphabet manuel", "Les expressions vocales", "Les emojis"],
-        answer: 0
-    },
-    {
-        question: "Quel element est tres important en ASL pour le sens ?",
-        options: ["La couleur des vetements", "Les expressions du visage", "La vitesse de marche"],
-        answer: 1
+const alphabetPool = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((letter) => ({
+    label: letter,
+    gif: `/static/asl_gifs/alphabet/${letter}.gif`,
+    category: "alphabet",
+}));
+
+const greetingsPool = [
+    ["HELLO", "/static/asl_gifs/greetings/HELLO.gif"],
+    ["GOODBYE", "/static/asl_gifs/greetings/GOODBYE.mp4"],
+    ["NICE TO MEET YOU", "/static/asl_gifs/greetings/NICE_TO_MEET_YOU.gif"],
+    ["WHAT'S YOUR NAME?", "/static/asl_gifs/greetings/WHATS_YOUR_NAME.gif"],
+    ["MY NAME IS", "/static/asl_gifs/greetings/MY_NAME_IS.gif"],
+    ["HOW ARE YOU?", "/static/asl_gifs/greetings/HOW_ARE_YOU.gif"],
+    ["I'M FINE", "/static/asl_gifs/greetings/IM_FINE.gif"],
+    ["THANK YOU", "/static/asl_gifs/greetings/THANK_YOU.gif"],
+    ["PLEASE", "/static/asl_gifs/greetings/PLEASE.gif"],
+].map(([label, gif]) => ({ label, gif, category: "greetings" }));
+
+const dailyPool = [
+    ["HUNGRY", "/static/asl_gifs/daily/HUNGRY.gif"],
+    ["THIRSTY", "/static/asl_gifs/daily/THIRSTY.gif"],
+    ["BATHROOM", "/static/asl_gifs/daily/BATHROOM.gif"],
+    ["HELP", "/static/asl_gifs/daily/HELP.gif"],
+    ["PLEASE", "/static/asl_gifs/daily/PLEASE.gif"],
+    ["THANK YOU", "/static/asl_gifs/daily/THANK_YOU.gif"],
+    ["WATER", "/static/asl_gifs/daily/WATER.gif"],
+    ["FOOD", "/static/asl_gifs/daily/FOOD.gif"],
+    ["TIRED", "/static/asl_gifs/daily/TIRED.gif"],
+    ["SLEEP", "/static/asl_gifs/daily/SLEEP.gif"],
+].map(([label, gif]) => ({ label, gif, category: "daily" }));
+
+const verbPool = [
+    ["EAT", "/static/asl_gifs/daily_verbs/EAT.gif"],
+    ["DRINK", "/static/asl_gifs/daily_verbs/DRINK.gif"],
+    ["WAKE UP", "/static/asl_gifs/daily_verbs/WAKE_UP.gif"],
+    ["GET UP", "/static/asl_gifs/daily_verbs/GET_UP.gif"],
+    ["WASH", "/static/asl_gifs/daily_verbs/WASH.gif"],
+    ["SHOWER", "/static/asl_gifs/daily_verbs/SHOWER.gif"],
+    ["BRUSH TEETH", "/static/asl_gifs/daily_verbs/BRUSH_TEETH.gif"],
+    ["GO", "/static/asl_gifs/daily_verbs/GO.gif"],
+    ["COME", "/static/asl_gifs/daily_verbs/COME.gif"],
+].map(([label, gif]) => ({ label, gif, category: "verbs" }));
+
+const allEntries = [...alphabetPool, ...greetingsPool, ...dailyPool, ...verbPool];
+const assetVersion = Date.now();
+
+function withAssetVersion(url) {
+    if (!url) return url;
+    return `${url}${url.includes("?") ? "&" : "?"}v=${assetVersion}`;
+}
+
+function isVideoMedia(url) {
+    if (!url) return false;
+    const clean = url.split("?")[0].toLowerCase();
+    return clean.endsWith(".mp4") || clean.endsWith(".webm") || clean.endsWith(".ogg");
+}
+
+function toMp4Candidate(url) {
+    if (!url) return url;
+    const clean = url.split("?")[0];
+    if (clean.toLowerCase().endsWith(".mp4")) return withAssetVersion(clean);
+    return withAssetVersion(clean.replace(/\.(gif|png|jpe?g|webp)$/i, ".mp4"));
+}
+
+function mediaMarkup(url, alt, cssClass) {
+    const src = withAssetVersion(url);
+    if (isVideoMedia(url)) {
+        return `<video src="${src}" class="${cssClass}" autoplay loop muted playsinline preload="metadata" aria-label="${alt}"></video>`;
     }
-];
+    const fallbackMp4 = toMp4Candidate(url);
+    return `<img src="${src}" alt="${alt}" class="${cssClass}" onerror="this.onerror=null; const v=document.createElement('video'); v.className='${cssClass}'; v.src='${fallbackMp4}'; v.autoplay=true; v.loop=true; v.muted=true; v.playsInline=true; this.replaceWith(v);">`;
+}
+
+function shuffle(arr) {
+    const copy = [...arr];
+    for (let i = copy.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+}
+
+function pickDistractors(correctEntry, pool, count = 2) {
+    const candidates = pool.filter((item) => item.gif !== correctEntry.gif);
+    const fromSamePool = shuffle(candidates).slice(0, count);
+    if (fromSamePool.length === count) return fromSamePool;
+
+    const missing = count - fromSamePool.length;
+    const fallbackCandidates = allEntries.filter(
+        (item) => item.gif !== correctEntry.gif && !fromSamePool.some((x) => x.gif === item.gif)
+    );
+    return [...fromSamePool, ...shuffle(fallbackCandidates).slice(0, missing)];
+}
+
+function buildQuestions(entries, pool, questionBuilder) {
+    return entries.map((entry) => {
+        const distractors = pickDistractors(entry, pool, 2);
+        const options = shuffle([entry, ...distractors]);
+        const answer = options.findIndex((opt) => opt.gif === entry.gif);
+        return {
+            question: questionBuilder(entry.label),
+            options,
+            answer,
+        };
+    });
+}
+
+function buildMatchingQuestions(entries, pool, questionBuilder) {
+    return entries.map((entry) => {
+        const distractors = pickDistractors(entry, pool, 2);
+        const options = shuffle([entry, ...distractors]);
+        const answer = options.findIndex((opt) => opt.label === entry.label);
+        return {
+            type: "gif_to_label",
+            question: questionBuilder(entry.label),
+            promptGif: entry.gif,
+            promptLabel: entry.label,
+            options,
+            answer,
+        };
+    });
+}
+
+const quizData = shuffle([
+    ...buildQuestions(alphabetPool, alphabetPool, (label) => `Which GIF matches letter ${label}?`),
+    ...buildQuestions(greetingsPool, greetingsPool, (label) => `Which GIF matches ${label}?`),
+    ...buildQuestions(dailyPool, dailyPool, (label) => `Which GIF matches ${label}?`),
+    ...buildQuestions(verbPool, verbPool, (label) => `Which GIF matches ${label}?`),
+    ...buildMatchingQuestions(greetingsPool, greetingsPool, () => "Match this GIF to the correct gesture:"),
+    ...buildMatchingQuestions(dailyPool, dailyPool, () => "Match this GIF to the correct gesture:"),
+    ...buildMatchingQuestions(verbPool, verbPool, () => "Match this GIF to the correct gesture:"),
+]);
 
 let currentIndex = 0;
 let score = 0;
@@ -73,11 +188,25 @@ function renderQuestion() {
     questionEl.textContent = item.question;
     optionsEl.innerHTML = "";
 
-    item.options.forEach((text, idx) => {
+    if (item.type === "gif_to_label") {
+        const prompt = document.createElement("div");
+        prompt.className = "quiz-prompt-gif";
+        prompt.innerHTML = mediaMarkup(item.promptGif, "ASL gesture", "quiz-prompt-gif-img");
+        optionsEl.appendChild(prompt);
+    }
+
+    item.options.forEach((opt, idx) => {
         const btn = document.createElement("button");
         btn.type = "button";
-        btn.textContent = text;
         btn.className = "quiz-option-btn";
+
+        if (item.type === "gif_to_label") {
+            btn.classList.add("quiz-option-text");
+            btn.textContent = opt.label;
+        } else {
+            btn.innerHTML = mediaMarkup(opt.gif, opt.label, "quiz-option-gif");
+        }
+
         btn.addEventListener("click", () => checkAnswer(idx, btn));
         optionsEl.appendChild(btn);
     });
@@ -95,11 +224,11 @@ function checkAnswer(selectedIndex, selectedButton) {
 
     if (selectedIndex === item.answer) {
         score += 1;
-        feedbackEl.textContent = "Bonne reponse.";
+        feedbackEl.textContent = "Correct answer.";
         feedbackEl.className = "quiz-feedback success";
     } else {
         selectedButton.classList.add("wrong");
-        feedbackEl.textContent = "Mauvaise reponse.";
+        feedbackEl.textContent = "Wrong answer.";
         feedbackEl.className = "quiz-feedback error";
     }
 
@@ -111,8 +240,9 @@ function checkAnswer(selectedIndex, selectedButton) {
 }
 
 function showResult() {
-    progressEl.textContent = "Quiz termine";
-    questionEl.textContent = `Votre score: ${score}/${quizData.length}`;
+    progressEl.textContent = "Quiz completed";
+    const pct = Math.round((score / quizData.length) * 100);
+    questionEl.textContent = `Your score: ${score}/${quizData.length} (${pct}%)`;
     optionsEl.innerHTML = "";
     feedbackEl.textContent = "";
     nextBtn.style.display = "none";
@@ -134,3 +264,4 @@ renderQuestion();
 </script>
 </body>
 </html>
+

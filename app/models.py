@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.database import Base
@@ -25,6 +25,7 @@ class Post(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(255), index=True)
     content = Column(Text)
+    image_url = Column(String(512))
     author_id = Column(Integer, ForeignKey("users.id"))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
@@ -58,3 +59,26 @@ class LearningProgress(Base):
     
     # Relations
     user = relationship("User", back_populates="learning_progress")
+
+
+class Course(Base):
+    __tablename__ = "courses"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(255), nullable=False, index=True)
+    description = Column(Text)
+    video_url = Column(String(512))
+
+
+class LearningItemProgress(Base):
+    __tablename__ = "learning_item_progress"
+    __table_args__ = (
+        UniqueConstraint("user_id", "course_id", "item_id", name="uq_learning_item_progress"),
+    )
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    course_id = Column(String(100), nullable=False, index=True)
+    item_id = Column(String(200), nullable=False, index=True)
+    completed = Column(Boolean, default=False, nullable=False)
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
