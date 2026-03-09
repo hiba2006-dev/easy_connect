@@ -16,7 +16,7 @@
     const importFile = document.getElementById("import-samples-file");
     const infoEl = document.getElementById("ai-calibration-info");
 
-    if (!video || !canvas || !resultEl || !startBtn || !stopBtn || !letterSelect || !captureBtn || !clearBtn || !exportBtn || !importBtn || !importFile || !infoEl) {
+    if (!video || !canvas || !resultEl || !startBtn || !stopBtn) {
         return;
     }
 
@@ -79,11 +79,13 @@
     }
 
     function updateCalibrationInfo() {
+        if (!infoEl) return;
         const parts = LETTERS.map((l) => `${l}:${dataset[l].length}`);
         infoEl.textContent = `Captured samples -> ${parts.join(" | ")}`;
     }
 
     function fillLetters() {
+        if (!letterSelect) return;
         LETTERS.forEach((letter) => {
             const opt = document.createElement("option");
             opt.value = letter;
@@ -261,6 +263,7 @@
     }
 
     function captureSample() {
+        if (!letterSelect) return;
         if (!lastLandmarks) {
             resultEl.textContent = "Detected sign: -- (no hand detected)";
             return;
@@ -345,11 +348,11 @@
 
     startBtn.addEventListener("click", startDetection);
     stopBtn.addEventListener("click", stopDetection);
-    captureBtn.addEventListener("click", captureSample);
-    clearBtn.addEventListener("click", clearSamples);
-    exportBtn.addEventListener("click", exportSamples);
-    importBtn.addEventListener("click", () => importFile.click());
-    importFile.addEventListener("change", async (e) => {
+    captureBtn?.addEventListener("click", captureSample);
+    clearBtn?.addEventListener("click", clearSamples);
+    exportBtn?.addEventListener("click", exportSamples);
+    importBtn?.addEventListener("click", () => importFile?.click());
+    importFile?.addEventListener("change", async (e) => {
         const file = e.target.files && e.target.files[0];
         if (!file) return;
         try {
