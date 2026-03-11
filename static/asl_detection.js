@@ -25,6 +25,10 @@
         return;
     }
 
+    // ✅ FIX: Appliquer le miroir CSS sur vidéo ET canvas
+    video.style.transform = "scaleX(-1)";
+    canvas.style.transform = "scaleX(-1)";
+
     const ctx = canvas.getContext("2d");
     let camera = null;
     let running = false;
@@ -204,7 +208,7 @@
     hands.setOptions({
         maxNumHands: 1,
         modelComplexity: 0,
-        selfieMode: true,
+        selfieMode: false, // ✅ FIX: désactivé, le miroir est géré par CSS
         minDetectionConfidence: 0.35,
         minTrackingConfidence: 0.35,
     });
@@ -271,14 +275,12 @@
         const letter = letterSelect.value;
         const vec = normalizeLandmarks(lastLandmarks);
 
-        // Prevent adding near-identical sample already used by another letter.
         const nearestOther = nearestDistance(vec, (l) => l !== letter);
         if (Number.isFinite(nearestOther) && nearestOther < 0.08) {
             resultEl.textContent = `Detected sign: -- (capture rejected: too close to another letter, change the pose)`;
             return;
         }
 
-        // Prevent duplicate spam for same letter.
         const nearestSame = nearestDistance(vec, (l) => l === letter);
         if (Number.isFinite(nearestSame) && nearestSame < 0.02) {
             resultEl.textContent = `Detected sign: -- (capture rejected: duplicate ${letter})`;

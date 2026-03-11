@@ -2,13 +2,15 @@ from fastapi import FastAPI, Depends, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from sqlalchemy import inspect, text
-from sqlalchemy.orm import Session
+import json
+
+from sqlalchemy import inspect, text, func
+from sqlalchemy.orm import Session, joinedload
 
 from app.database import engine, get_db
 import app.models as models
 import app.auth as auth
-from app.routers import users, community, learning
+from app.routers import users, community, learning, admin, quiz
 
 DEFAULT_COURSES = [
     {
@@ -25,6 +27,249 @@ DEFAULT_COURSES = [
         "title": "Daily Conversation",
         "description": "Express common daily needs in ASL.",
         "video_url": "https://www.youtube.com/embed/6_gXiBe9y9A",
+    },
+]
+
+DEFAULT_QUIZ_QUESTIONS = [
+    {
+        "prompt": "Which GIF depicts the letter A?",
+        "prompt_media": "/static/asl_gifs/alphabet/A.gif",
+        "prompt_type": "gif_to_label",
+        "options": [
+            {"label": "A", "gif": "/static/asl_gifs/alphabet/A.gif"},
+            {"label": "B", "gif": "/static/asl_gifs/alphabet/B.gif"},
+            {"label": "G", "gif": "/static/asl_gifs/alphabet/G.gif"},
+        ],
+        "answer_index": 0,
+        "category": "alphabet",
+    },
+    {
+        "prompt": "Which GIF depicts the letter B?",
+        "prompt_media": "/static/asl_gifs/alphabet/B.gif",
+        "prompt_type": "gif_to_label",
+        "options": [
+            {"label": "A", "gif": "/static/asl_gifs/alphabet/A.gif"},
+            {"label": "B", "gif": "/static/asl_gifs/alphabet/B.gif"},
+            {"label": "C", "gif": "/static/asl_gifs/alphabet/C.gif"},
+        ],
+        "answer_index": 1,
+        "category": "alphabet",
+    },
+    {
+        "prompt": "Which GIF depicts the letter C?",
+        "prompt_media": "/static/asl_gifs/alphabet/C.gif",
+        "prompt_type": "gif_to_label",
+        "options": [
+            {"label": "C", "gif": "/static/asl_gifs/alphabet/C.gif"},
+            {"label": "D", "gif": "/static/asl_gifs/alphabet/D.gif"},
+            {"label": "E", "gif": "/static/asl_gifs/alphabet/E.gif"},
+        ],
+        "answer_index": 0,
+        "category": "alphabet",
+    },
+    {
+        "prompt": "Which GIF depicts the letter D?",
+        "prompt_media": "/static/asl_gifs/alphabet/D.gif",
+        "prompt_type": "gif_to_label",
+        "options": [
+            {"label": "D", "gif": "/static/asl_gifs/alphabet/D.gif"},
+            {"label": "F", "gif": "/static/asl_gifs/alphabet/F.gif"},
+            {"label": "H", "gif": "/static/asl_gifs/alphabet/H.gif"},
+        ],
+        "answer_index": 0,
+        "category": "alphabet",
+    },
+    {
+        "prompt": "Which GIF depicts the letter F?",
+        "prompt_media": "/static/asl_gifs/alphabet/F.gif",
+        "prompt_type": "gif_to_label",
+        "options": [
+            {"label": "E", "gif": "/static/asl_gifs/alphabet/E.gif"},
+            {"label": "F", "gif": "/static/asl_gifs/alphabet/F.gif"},
+            {"label": "G", "gif": "/static/asl_gifs/alphabet/G.gif"},
+        ],
+        "answer_index": 1,
+        "category": "alphabet",
+    },
+    {
+        "prompt": "Which GIF depicts the letter H?",
+        "prompt_media": "/static/asl_gifs/alphabet/H.gif",
+        "prompt_type": "gif_to_label",
+        "options": [
+            {"label": "G", "gif": "/static/asl_gifs/alphabet/G.gif"},
+            {"label": "H", "gif": "/static/asl_gifs/alphabet/H.gif"},
+            {"label": "I", "gif": "/static/asl_gifs/alphabet/I.gif"},
+        ],
+        "answer_index": 1,
+        "category": "alphabet",
+    },
+    {
+        "prompt": "Which GIF depicts the letter L?",
+        "prompt_media": "/static/asl_gifs/alphabet/L.gif",
+        "prompt_type": "gif_to_label",
+        "options": [
+            {"label": "K", "gif": "/static/asl_gifs/alphabet/K.gif"},
+            {"label": "L", "gif": "/static/asl_gifs/alphabet/L.gif"},
+            {"label": "M", "gif": "/static/asl_gifs/alphabet/M.gif"},
+        ],
+        "answer_index": 1,
+        "category": "alphabet",
+    },
+    {
+        "prompt": "Which GIF depicts the letter O?",
+        "prompt_media": "/static/asl_gifs/alphabet/O.gif",
+        "prompt_type": "gif_to_label",
+        "options": [
+            {"label": "O", "gif": "/static/asl_gifs/alphabet/O.gif"},
+            {"label": "P", "gif": "/static/asl_gifs/alphabet/P.gif"},
+            {"label": "Q", "gif": "/static/asl_gifs/alphabet/Q.gif"},
+        ],
+        "answer_index": 0,
+        "category": "alphabet",
+    },
+    {
+        "prompt": "Which GIF depicts the letter R?",
+        "prompt_media": "/static/asl_gifs/alphabet/R.gif",
+        "prompt_type": "gif_to_label",
+        "options": [
+            {"label": "P", "gif": "/static/asl_gifs/alphabet/P.gif"},
+            {"label": "R", "gif": "/static/asl_gifs/alphabet/R.gif"},
+            {"label": "T", "gif": "/static/asl_gifs/alphabet/T.gif"},
+        ],
+        "answer_index": 1,
+        "category": "alphabet",
+    },
+    {
+        "prompt": "Which GIF depicts the letter S?",
+        "prompt_media": "/static/asl_gifs/alphabet/S.gif",
+        "prompt_type": "gif_to_label",
+        "options": [
+            {"label": "R", "gif": "/static/asl_gifs/alphabet/R.gif"},
+            {"label": "S", "gif": "/static/asl_gifs/alphabet/S.gif"},
+            {"label": "T", "gif": "/static/asl_gifs/alphabet/T.gif"},
+        ],
+        "answer_index": 1,
+        "category": "alphabet",
+    },
+    {
+        "prompt": "Select the GIF that matches the greeting \"HELLO\".",
+        "prompt_media": None,
+        "prompt_type": "label_to_gif",
+        "options": [
+            {"label": "HELLO", "gif": "/static/asl_gifs/greetings/HELLO.mp4"},
+            {"label": "THANK YOU", "gif": "/static/asl_gifs/greetings/THANK_YOU.mp4"},
+            {"label": "GOODBYE", "gif": "/static/asl_gifs/greetings/GOODBYE.mp4"},
+        ],
+        "answer_index": 0,
+        "category": "greetings",
+    },
+    {
+        "prompt": "Match the label \"THANK YOU\" to the correct GIF.",
+        "prompt_media": None,
+        "prompt_type": "label_to_gif",
+        "options": [
+            {"label": "THANK YOU", "gif": "/static/asl_gifs/greetings/THANK_YOU.mp4"},
+            {"label": "PLEASE", "gif": "/static/asl_gifs/greetings/PLEASE.mp4"},
+            {"label": "HELLO", "gif": "/static/asl_gifs/greetings/HELLO.mp4"},
+        ],
+        "answer_index": 0,
+        "category": "greetings",
+    },
+    {
+        "prompt": "Which GIF shows the sign for \"PLEASE\"?",
+        "prompt_media": "/static/asl_gifs/greetings/PLEASE.mp4",
+        "prompt_type": "gif_to_label",
+        "options": [
+            {"label": "PLEASE", "gif": "/static/asl_gifs/greetings/PLEASE.mp4"},
+            {"label": "THANK YOU", "gif": "/static/asl_gifs/greetings/THANK_YOU.mp4"},
+            {"label": "HELLO", "gif": "/static/asl_gifs/greetings/HELLO.mp4"},
+        ],
+        "answer_index": 0,
+        "category": "greetings",
+    },
+    {
+        "prompt": "Choose the GIF that illustrates \"GOODBYE\".",
+        "prompt_media": "/static/asl_gifs/greetings/GOODBYE.mp4",
+        "prompt_type": "gif_to_label",
+        "options": [
+            {"label": "GOODBYE", "gif": "/static/asl_gifs/greetings/GOODBYE.mp4"},
+            {"label": "MY NAME IS", "gif": "/static/asl_gifs/greetings/MY_NAME_IS.mp4"},
+            {"label": "NICE TO MEET YOU", "gif": "/static/asl_gifs/greetings/NICE_TO_MEET_YOU.mp4"},
+        ],
+        "answer_index": 0,
+        "category": "greetings",
+    },
+    {
+        "prompt": "Choose the GIF that matches \"THIRSTY\".",
+        "prompt_media": "/static/asl_gifs/daily/THIRSTY.mp4",
+        "prompt_type": "gif_to_label",
+        "options": [
+            {"label": "THIRSTY", "gif": "/static/asl_gifs/daily/THIRSTY.mp4"},
+            {"label": "HUNGRY", "gif": "/static/asl_gifs/daily/HUNGRY.mp4"},
+            {"label": "WATER", "gif": "/static/asl_gifs/daily/WATER.mp4"},
+        ],
+        "answer_index": 0,
+        "category": "daily",
+    },
+    {
+        "prompt": "Which GIF shows the sign for \"HUNGRY\"?",
+        "prompt_media": "/static/asl_gifs/daily/HUNGRY.mp4",
+        "prompt_type": "gif_to_label",
+        "options": [
+            {"label": "HUNGRY", "gif": "/static/asl_gifs/daily/HUNGRY.mp4"},
+            {"label": "TIRED", "gif": "/static/asl_gifs/daily/TIRED.mp4"},
+            {"label": "FOOD", "gif": "/static/asl_gifs/daily/FOOD.mp4"},
+        ],
+        "answer_index": 0,
+        "category": "daily",
+    },
+    {
+        "prompt": "Match the label \"WATER\" to the correct GIF.",
+        "prompt_media": None,
+        "prompt_type": "label_to_gif",
+        "options": [
+            {"label": "WATER", "gif": "/static/asl_gifs/daily/WATER.mp4"},
+            {"label": "SLEEP", "gif": "/static/asl_gifs/daily/SLEEP.mp4"},
+            {"label": "FOOD", "gif": "/static/asl_gifs/daily/FOOD.mp4"},
+        ],
+        "answer_index": 0,
+        "category": "daily",
+    },
+    {
+        "prompt": "Match the label \"HELP\" to the correct GIF.",
+        "prompt_media": None,
+        "prompt_type": "label_to_gif",
+        "options": [
+            {"label": "HELP", "gif": "/static/asl_gifs/daily/HELP.mp4"},
+            {"label": "PLEASE", "gif": "/static/asl_gifs/daily/PLEASE.mp4"},
+            {"label": "TIRED", "gif": "/static/asl_gifs/daily/TIRED.mp4"},
+        ],
+        "answer_index": 0,
+        "category": "daily",
+    },
+    {
+        "prompt": "Match the label \"BRUSH TEETH\" to the correct GIF.",
+        "prompt_media": None,
+        "prompt_type": "label_to_gif",
+        "options": [
+            {"label": "BRUSH TEETH", "gif": "/static/asl_gifs/daily_verbs/BRUSH_TEETH.mp4"},
+            {"label": "WASH", "gif": "/static/asl_gifs/daily_verbs/WASH.mp4"},
+            {"label": "SHOWER", "gif": "/static/asl_gifs/daily_verbs/SHOWER.mp4"},
+        ],
+        "answer_index": 0,
+        "category": "daily_verbs",
+    },
+    {
+        "prompt": "Which GIF illustrates \"DRINK\"?",
+        "prompt_media": "/static/asl_gifs/daily_verbs/DRINK.mp4",
+        "prompt_type": "gif_to_label",
+        "options": [
+            {"label": "DRINK", "gif": "/static/asl_gifs/daily_verbs/DRINK.mp4"},
+            {"label": "EAT", "gif": "/static/asl_gifs/daily_verbs/EAT.mp4"},
+            {"label": "WAKE UP", "gif": "/static/asl_gifs/daily_verbs/WAKE_UP.mp4"},
+        ],
+        "answer_index": 0,
+        "category": "daily_verbs",
     },
 ]
 
@@ -49,6 +294,8 @@ def migrate_legacy_mysql_schema() -> None:
             conn.execute(text("ALTER TABLE users ADD COLUMN hashed_password VARCHAR(255) NULL"))
         if "is_active" not in existing_columns:
             conn.execute(text("ALTER TABLE users ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT TRUE"))
+        if "is_admin" not in existing_columns:
+            conn.execute(text("ALTER TABLE users ADD COLUMN is_admin BOOLEAN NOT NULL DEFAULT FALSE"))
 
         if "name" in existing_columns:
             conn.execute(
@@ -117,6 +364,28 @@ def migrate_legacy_mysql_schema() -> None:
             if "video_url" not in course_columns:
                 conn.execute(text("ALTER TABLE courses ADD COLUMN video_url VARCHAR(512) NULL"))
 
+    # Quiz question migration safety.
+    if "quiz_questions" in inspector.get_table_names():
+        quiz_columns = {col["name"] for col in inspector.get_columns("quiz_questions")}
+        with engine.begin() as conn:
+            if "prompt_media" not in quiz_columns:
+                conn.execute(text("ALTER TABLE quiz_questions ADD COLUMN prompt_media VARCHAR(512) NULL"))
+            if "prompt_type" not in quiz_columns:
+                conn.execute(text("ALTER TABLE quiz_questions ADD COLUMN prompt_type VARCHAR(32) NOT NULL DEFAULT 'gif_to_label'"))
+            if "answer_index" not in quiz_columns:
+                conn.execute(text("ALTER TABLE quiz_questions ADD COLUMN answer_index INT NOT NULL DEFAULT 0"))
+            if "options" not in quiz_columns:
+                conn.execute(text("ALTER TABLE quiz_questions ADD COLUMN options TEXT NOT NULL"))
+            if "category" not in quiz_columns:
+                conn.execute(text("ALTER TABLE quiz_questions ADD COLUMN category VARCHAR(64) NULL"))
+            # ensure new columns have defaults where necessary
+            if "prompt_type" not in quiz_columns:
+                conn.execute(text("UPDATE quiz_questions SET prompt_type = 'gif_to_label' WHERE prompt_type IS NULL"))
+            if "options" not in quiz_columns:
+                conn.execute(text("UPDATE quiz_questions SET options = '[]' WHERE options IS NULL"))
+            if "answer_index" not in quiz_columns:
+                conn.execute(text("UPDATE quiz_questions SET answer_index = 0 WHERE answer_index IS NULL"))
+
 
 def seed_courses_if_empty() -> None:
     if engine.dialect.name != "mysql":
@@ -142,6 +411,13 @@ def seed_community_demo_data() -> None:
         return
 
     demo_users = [
+        {
+            "username": "admin",
+            "email": "admin@easyconnect.local",
+            "full_name": "Administrateur",
+            "password": "admin12345",
+            "is_admin": True,
+        },
         {
             "username": "sarah_asl",
             "email": "sarah.asl@example.com",
@@ -202,17 +478,19 @@ def seed_community_demo_data() -> None:
             if existing_id:
                 continue
 
+            password = user.get("password", "demo12345")
             conn.execute(
                 text(
-                    "INSERT INTO users (email, username, full_name, hashed_password, is_active) "
-                    "VALUES (:email, :username, :full_name, :hashed_password, :is_active)"
+                    "INSERT INTO users (email, username, full_name, hashed_password, is_active, is_admin) "
+                    "VALUES (:email, :username, :full_name, :hashed_password, :is_active, :is_admin)"
                 ),
                 {
                     "email": user["email"],
                     "username": user["username"],
                     "full_name": user["full_name"],
-                    "hashed_password": auth.get_password_hash("demo12345"),
+                    "hashed_password": auth.get_password_hash(password),
                     "is_active": True,
+                    "is_admin": bool(user.get("is_admin", False)),
                 },
             )
 
@@ -282,10 +560,38 @@ def seed_community_demo_data() -> None:
                 )
 
 
+def seed_quiz_questions() -> None:
+    with engine.begin() as conn:
+        existing_prompts = {
+            row[0] for row in conn.execute(text("SELECT prompt FROM quiz_questions")).fetchall()
+        }
+        if len(existing_prompts) >= len(DEFAULT_QUIZ_QUESTIONS):
+            return
+
+        for question in DEFAULT_QUIZ_QUESTIONS:
+            if question["prompt"] in existing_prompts:
+                continue
+            conn.execute(
+                text(
+                    "INSERT INTO quiz_questions (prompt, prompt_media, prompt_type, answer_index, options, category) "
+                    "VALUES (:prompt, :prompt_media, :prompt_type, :answer_index, :options, :category)"
+                ),
+                {
+                    "prompt": question["prompt"],
+                    "prompt_media": question.get("prompt_media"),
+                    "prompt_type": question["prompt_type"],
+                    "answer_index": question["answer_index"],
+                    "options": json.dumps(question["options"], ensure_ascii=False),
+                    "category": question.get("category"),
+                },
+            )
+
+
 migrate_legacy_mysql_schema()
 models.Base.metadata.create_all(bind=engine)
 seed_courses_if_empty()
 seed_community_demo_data()
+seed_quiz_questions()
 
 app = FastAPI(title="EasyConnect")
 
@@ -295,6 +601,8 @@ templates = Jinja2Templates(directory="templates")
 app.include_router(users.router)
 app.include_router(community.router)
 app.include_router(learning.router)
+app.include_router(admin.router)
+app.include_router(quiz.router)
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -308,6 +616,9 @@ async def dashboard(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user),
 ):
+    if current_user.is_admin:
+        return RedirectResponse(url="/administration")
+
     posts_count = db.query(models.Post).filter(
         models.Post.author_id == current_user.id
     ).count()
@@ -331,6 +642,94 @@ async def dashboard(
                 "comments": comments_count,
                 "courses": courses_in_progress,
             },
+        },
+    )
+
+
+@app.get("/administration", response_class=HTMLResponse)
+async def administration_page(
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_active_user),
+):
+    if not current_user.is_admin:
+        return RedirectResponse(url="/dashboard")
+
+    total_users = db.query(func.count(models.User.id)).scalar() or 0
+    active_users = (
+        db.query(func.count(models.User.id))
+        .filter(models.User.is_active == True)
+        .scalar()
+        or 0
+    )
+    posts_total = db.query(func.count(models.Post.id)).scalar() or 0
+    comments_total = db.query(func.count(models.Comment.id)).scalar() or 0
+    courses_total = db.query(func.count(models.Course.id)).scalar() or 0
+    recent_users = (
+        db.query(models.User)
+        .order_by(models.User.created_at.desc())
+        .limit(5)
+        .all()
+    )
+
+    users = db.query(models.User).order_by(models.User.created_at.desc()).all()
+    courses = db.query(models.Course).order_by(models.Course.title.asc()).all()
+    posts = (
+        db.query(models.Post)
+        .options(joinedload(models.Post.author))
+        .order_by(models.Post.created_at.desc())
+        .limit(8)
+        .all()
+    )
+    comments = (
+        db.query(models.Comment)
+        .options(
+            joinedload(models.Comment.author),
+            joinedload(models.Comment.post),
+        )
+        .order_by(models.Comment.created_at.desc())
+        .limit(8)
+        .all()
+    )
+    quiz_rows = (
+        db.query(models.QuizQuestion)
+        .order_by(models.QuizQuestion.created_at.desc())
+        .all()
+    )
+    quiz_questions = [
+        {
+            "id": row.id,
+            "prompt": row.prompt,
+            "prompt_media": row.prompt_media,
+            "prompt_type": row.prompt_type,
+            "answer_index": row.answer_index,
+            "category": row.category,
+            "options": json.loads(row.options or "[]"),
+        }
+        for row in quiz_rows
+    ]
+
+    return templates.TemplateResponse(
+        "administration.html",
+        {
+            "request": request,
+            "user": current_user,
+            "stats": {
+                "total_users": total_users,
+                "active_users": active_users,
+                "inactive_users": max(total_users - active_users, 0),
+                "posts": posts_total,
+                "comments": comments_total,
+                "courses": courses_total,
+            },
+            "recent_users": recent_users,
+            "users": users,
+            "courses": courses,
+            "posts": posts,
+            "comments": comments,
+            "quiz_questions": quiz_questions,
+            "message": request.query_params.get("msg"),
+            "error": request.query_params.get("error"),
         },
     )
 

@@ -9,8 +9,12 @@
     <header>
         <h1>EasyConnect Dashboard</h1>
         <div class="top-links">
-            <a href="/community">Community</a>
-            <a href="/learning">Learning</a>
+            {% if user.is_admin %}
+                <a href="/administration">Administration</a>
+            {% else %}
+                <a href="/community">Community</a>
+                <a href="/learning">Learning</a>
+            {% endif %}
             <a href="/auth/logout">Logout</a>
         </div>
     </header>

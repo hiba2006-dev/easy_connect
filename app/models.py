@@ -12,6 +12,7 @@ class User(Base):
     full_name = Column(String(255))
     hashed_password = Column(String(255), nullable=False)
     is_active = Column(Boolean, default=True)
+    is_admin = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     # Relations
@@ -82,3 +83,16 @@ class LearningItemProgress(Base):
     item_id = Column(String(200), nullable=False, index=True)
     completed = Column(Boolean, default=False, nullable=False)
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+
+class QuizQuestion(Base):
+    __tablename__ = "quiz_questions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    prompt = Column(String(512), nullable=False)
+    prompt_media = Column(String(512))
+    prompt_type = Column(String(32), nullable=False, default="gif_to_label")
+    answer_index = Column(Integer, nullable=False)
+    options = Column(Text, nullable=False)
+    category = Column(String(64))
+    created_at = Column(DateTime(timezone=True), server_default=func.now())

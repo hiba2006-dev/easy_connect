@@ -31,53 +31,16 @@
         <button id="quiz-next" type="button" class="btn-soft" style="display:none;">Next question</button>
         <button id="quiz-restart" type="button" style="display:none;">Restart</button>
     </div>
+    <div id="quiz-congrats" class="quiz-congrats" hidden>
+        <span class="quiz-cake">🎂</span>
+        <div>
+            <p class="quiz-congrats-title">You did it!</p>
+            <p class="muted">A fun, cute congrats cake pops up once you finish the whole quiz. Celebrate your new milestone!</p>
+        </div>
+    </div>
 </div>
 
 <script>
-const alphabetPool = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((letter) => ({
-    label: letter,
-    gif: `/static/asl_gifs/alphabet/${letter}.gif`,
-    category: "alphabet",
-}));
-
-const greetingsPool = [
-    ["HELLO", "/static/asl_gifs/greetings/HELLO.gif"],
-    ["GOODBYE", "/static/asl_gifs/greetings/GOODBYE.mp4"],
-    ["NICE TO MEET YOU", "/static/asl_gifs/greetings/NICE_TO_MEET_YOU.gif"],
-    ["WHAT'S YOUR NAME?", "/static/asl_gifs/greetings/WHATS_YOUR_NAME.gif"],
-    ["MY NAME IS", "/static/asl_gifs/greetings/MY_NAME_IS.gif"],
-    ["HOW ARE YOU?", "/static/asl_gifs/greetings/HOW_ARE_YOU.gif"],
-    ["I'M FINE", "/static/asl_gifs/greetings/IM_FINE.gif"],
-    ["THANK YOU", "/static/asl_gifs/greetings/THANK_YOU.gif"],
-    ["PLEASE", "/static/asl_gifs/greetings/PLEASE.gif"],
-].map(([label, gif]) => ({ label, gif, category: "greetings" }));
-
-const dailyPool = [
-    ["HUNGRY", "/static/asl_gifs/daily/HUNGRY.gif"],
-    ["THIRSTY", "/static/asl_gifs/daily/THIRSTY.gif"],
-    ["BATHROOM", "/static/asl_gifs/daily/BATHROOM.gif"],
-    ["HELP", "/static/asl_gifs/daily/HELP.gif"],
-    ["PLEASE", "/static/asl_gifs/daily/PLEASE.gif"],
-    ["THANK YOU", "/static/asl_gifs/daily/THANK_YOU.gif"],
-    ["WATER", "/static/asl_gifs/daily/WATER.gif"],
-    ["FOOD", "/static/asl_gifs/daily/FOOD.gif"],
-    ["TIRED", "/static/asl_gifs/daily/TIRED.gif"],
-    ["SLEEP", "/static/asl_gifs/daily/SLEEP.gif"],
-].map(([label, gif]) => ({ label, gif, category: "daily" }));
-
-const verbPool = [
-    ["EAT", "/static/asl_gifs/daily_verbs/EAT.gif"],
-    ["DRINK", "/static/asl_gifs/daily_verbs/DRINK.gif"],
-    ["WAKE UP", "/static/asl_gifs/daily_verbs/WAKE_UP.gif"],
-    ["GET UP", "/static/asl_gifs/daily_verbs/GET_UP.gif"],
-    ["WASH", "/static/asl_gifs/daily_verbs/WASH.gif"],
-    ["SHOWER", "/static/asl_gifs/daily_verbs/SHOWER.gif"],
-    ["BRUSH TEETH", "/static/asl_gifs/daily_verbs/BRUSH_TEETH.gif"],
-    ["GO", "/static/asl_gifs/daily_verbs/GO.gif"],
-    ["COME", "/static/asl_gifs/daily_verbs/COME.gif"],
-].map(([label, gif]) => ({ label, gif, category: "verbs" }));
-
-const allEntries = [...alphabetPool, ...greetingsPool, ...dailyPool, ...verbPool];
 const assetVersion = Date.now();
 
 function withAssetVersion(url) {
@@ -99,6 +62,9 @@ function toMp4Candidate(url) {
 }
 
 function mediaMarkup(url, alt, cssClass) {
+    if (!url) {
+        return `<span class="${cssClass}">${alt}</span>`;
+    }
     const src = withAssetVersion(url);
     if (isVideoMedia(url)) {
         return `<video src="${src}" class="${cssClass}" autoplay loop muted playsinline preload="metadata" aria-label="${alt}"></video>`;
@@ -116,113 +82,84 @@ function shuffle(arr) {
     return copy;
 }
 
-function pickDistractors(correctEntry, pool, count = 2) {
-    const candidates = pool.filter((item) => item.gif !== correctEntry.gif);
-    const fromSamePool = shuffle(candidates).slice(0, count);
-    if (fromSamePool.length === count) return fromSamePool;
-
-    const missing = count - fromSamePool.length;
-    const fallbackCandidates = allEntries.filter(
-        (item) => item.gif !== correctEntry.gif && !fromSamePool.some((x) => x.gif === item.gif)
-    );
-    return [...fromSamePool, ...shuffle(fallbackCandidates).slice(0, missing)];
-}
-
-function buildQuestions(entries, pool, questionBuilder) {
-    return entries.map((entry) => {
-        const distractors = pickDistractors(entry, pool, 2);
-        const options = shuffle([entry, ...distractors]);
-        const answer = options.findIndex((opt) => opt.gif === entry.gif);
-        return {
-            question: questionBuilder(entry.label),
-            options,
-            answer,
-        };
-    });
-}
-
-function buildMatchingQuestions(entries, pool, questionBuilder) {
-    return entries.map((entry) => {
-        const distractors = pickDistractors(entry, pool, 2);
-        const options = shuffle([entry, ...distractors]);
-        const answer = options.findIndex((opt) => opt.label === entry.label);
-        return {
-            type: "gif_to_label",
-            question: questionBuilder(entry.label),
-            promptGif: entry.gif,
-            promptLabel: entry.label,
-            options,
-            answer,
-        };
-    });
-}
-
-const quizData = shuffle([
-    ...buildQuestions(alphabetPool, alphabetPool, (label) => `Which GIF matches letter ${label}?`),
-    ...buildQuestions(greetingsPool, greetingsPool, (label) => `Which GIF matches ${label}?`),
-    ...buildQuestions(dailyPool, dailyPool, (label) => `Which GIF matches ${label}?`),
-    ...buildQuestions(verbPool, verbPool, (label) => `Which GIF matches ${label}?`),
-    ...buildMatchingQuestions(greetingsPool, greetingsPool, () => "Match this GIF to the correct gesture:"),
-    ...buildMatchingQuestions(dailyPool, dailyPool, () => "Match this GIF to the correct gesture:"),
-    ...buildMatchingQuestions(verbPool, verbPool, () => "Match this GIF to the correct gesture:"),
-]);
-
-let currentIndex = 0;
-let score = 0;
-let locked = false;
-
 const progressEl = document.getElementById("quiz-progress");
 const questionEl = document.getElementById("quiz-question");
 const optionsEl = document.getElementById("quiz-options");
 const feedbackEl = document.getElementById("quiz-feedback");
 const nextBtn = document.getElementById("quiz-next");
 const restartBtn = document.getElementById("quiz-restart");
+const congratsEl = document.getElementById("quiz-congrats");
+
+if (congratsEl) {
+    congratsEl.hidden = true;
+}
+
+let finalAnswerReady = false;
+
+let quizData = [];
+let currentIndex = 0;
+let score = 0;
+let locked = false;
 
 function renderQuestion() {
+    if (!quizData.length) {
+        questionEl.textContent = "Aucune question disponible pour le moment.";
+        optionsEl.innerHTML = "";
+        return;
+    }
+    finalAnswerReady = false;
+    if (congratsEl) {
+        congratsEl.hidden = true;
+    }
+
     const item = quizData[currentIndex];
     locked = false;
     feedbackEl.textContent = "";
     nextBtn.style.display = "none";
     restartBtn.style.display = "none";
     progressEl.textContent = `Question ${currentIndex + 1} / ${quizData.length}`;
-    questionEl.textContent = item.question;
+    questionEl.textContent = item.prompt;
     optionsEl.innerHTML = "";
 
-    if (item.type === "gif_to_label") {
-        const prompt = document.createElement("div");
-        prompt.className = "quiz-prompt-gif";
-        prompt.innerHTML = mediaMarkup(item.promptGif, "ASL gesture", "quiz-prompt-gif-img");
-        optionsEl.appendChild(prompt);
-    }
-
-    item.options.forEach((opt, idx) => {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "quiz-option-btn";
-
-        if (item.type === "gif_to_label") {
-            btn.classList.add("quiz-option-text");
-            btn.textContent = opt.label;
-        } else {
-            btn.innerHTML = mediaMarkup(opt.gif, opt.label, "quiz-option-gif");
+    if (item.prompt_type === "gif_to_label") {
+        if (item.prompt_media) {
+            const visual = document.createElement("div");
+            visual.className = "quiz-prompt-gif";
+            visual.innerHTML = mediaMarkup(item.prompt_media, "ASL gif", "quiz-prompt-gif-img");
+            optionsEl.appendChild(visual);
         }
 
-        btn.addEventListener("click", () => checkAnswer(idx, btn));
-        optionsEl.appendChild(btn);
-    });
+        item.options.forEach((opt, index) => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "quiz-option-btn quiz-option-text";
+            btn.textContent = opt.label;
+            btn.addEventListener("click", () => checkAnswer(index, btn));
+            optionsEl.appendChild(btn);
+        });
+    } else {
+        item.options.forEach((opt, index) => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "quiz-option-btn";
+            btn.innerHTML = mediaMarkup(opt.gif, opt.label, "quiz-option-gif");
+            btn.addEventListener("click", () => checkAnswer(index, btn));
+            optionsEl.appendChild(btn);
+        });
+    }
 }
 
 function checkAnswer(selectedIndex, selectedButton) {
-    if (locked) return;
+    if (locked || !quizData.length) return;
     locked = true;
     const item = quizData[currentIndex];
     const buttons = optionsEl.querySelectorAll("button");
 
     buttons.forEach((btn, idx) => {
-        if (idx === item.answer) btn.classList.add("correct");
+        if (idx === item.answer_index) btn.classList.add("correct");
     });
 
-    if (selectedIndex === item.answer) {
+    if (selectedIndex === item.answer_index) {
         score += 1;
         feedbackEl.textContent = "Correct answer.";
         feedbackEl.className = "quiz-feedback success";
@@ -232,11 +169,12 @@ function checkAnswer(selectedIndex, selectedButton) {
         feedbackEl.className = "quiz-feedback error";
     }
 
-    if (currentIndex < quizData.length - 1) {
+    const isLast = currentIndex === quizData.length - 1;
+    nextBtn.textContent = isLast ? "Finish" : "Next question";
+    if (nextBtn) {
         nextBtn.style.display = "inline-block";
-    } else {
-        showResult();
     }
+    finalAnswerReady = isLast;
 }
 
 function showResult() {
@@ -247,21 +185,69 @@ function showResult() {
     feedbackEl.textContent = "";
     nextBtn.style.display = "none";
     restartBtn.style.display = "inline-block";
+    if (congratsEl) {
+        congratsEl.hidden = false;
+    }
 }
 
 nextBtn.addEventListener("click", () => {
-    currentIndex += 1;
-    renderQuestion();
+    if (finalAnswerReady) {
+        showResult();
+        return;
+    }
+    if (currentIndex < quizData.length - 1) {
+        currentIndex += 1;
+        renderQuestion();
+    }
 });
 
 restartBtn.addEventListener("click", () => {
     currentIndex = 0;
     score = 0;
+    quizData = shuffle(quizData);
+    if (congratsEl) {
+        congratsEl.hidden = true;
+    }
     renderQuestion();
 });
 
-renderQuestion();
+function loadQuizData() {
+    fetch("/api/quiz/questions")
+        .then((res) => res.json())
+        .then((data) => {
+            const raw = Array.isArray(data.questions) ? data.questions : [];
+            const maxDesired = 20;
+            if (!raw.length) {
+                quizData = [];
+                questionEl.textContent = "Aucune question disponible pour le moment.";
+                if (congratsEl) congratsEl.hidden = true;
+                return;
+            }
+            const targetCount = Math.min(maxDesired, raw.length);
+            const prepared = shuffle(raw).slice(0, targetCount);
+            quizData = prepared;
+            if (!quizData.length) {
+                questionEl.textContent = "Aucune question disponible pour le moment.";
+                if (congratsEl) congratsEl.hidden = true;
+                return;
+            }
+            currentIndex = 0;
+            score = 0;
+            locked = false;
+            finalAnswerReady = false;
+            feedbackEl.textContent = "";
+            if (nextBtn) nextBtn.style.display = "none";
+            if (restartBtn) restartBtn.style.display = "none";
+            if (congratsEl) congratsEl.hidden = true;
+            renderQuestion();
+        })
+        .catch(() => {
+            questionEl.textContent = "Impossible de charger les questions.";
+            if (congratsEl) congratsEl.hidden = true;
+        });
+}
+
+loadQuizData();
 </script>
 </body>
 </html>
-

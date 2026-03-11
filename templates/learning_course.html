@@ -50,7 +50,11 @@
 (() => {
     const dataEl = document.getElementById("course-items-data");
     if (!dataEl) return;
-    const items = JSON.parse(dataEl.textContent || "[]");
+    const allItems = JSON.parse(dataEl.textContent || "[]");
+    const skipSections = new Set(["Lesson", "Practice", "Dialogue", "Exercise", "Sentence"]);
+    const items = Array.isArray(allItems)
+        ? allItems.filter((item) => !skipSections.has(item.section))
+        : [];
     if (!Array.isArray(items) || items.length === 0) return;
 
     const counterEl = document.getElementById("slide-counter");
