@@ -2,15 +2,40 @@ import json
 import random
 
 from fastapi import APIRouter, Depends
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 import app.auth as auth
 import app.models as models
+from app.activity import record_activity
 from app.database import get_db
 
 MAX_QUIZ_QUESTIONS = 20
 
+
+class QuizCompletionPayload(BaseModel):
+    score: int
+    total: int
+    percent: int
+
 router = APIRouter(prefix="/api/quiz", tags=["quiz"])
+
+
+@router.post("/complete")
+async def complete_quiz(
+    payload: QuizCompletionPayload,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_active_user),
+):
+    record_activity(
+        db,
+        current_user.id,
+        "quiz_completion",
+        f"Quiz terminé {payload.score}/{payload.total} ({payload.percent}%)",
+        {"score": payload.score, "total": payload.total, "percent": payload.percent},
+    )
+    db.commit()
+    return {"ok": True}
 
 
 @router.get("/questions")

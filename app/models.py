@@ -19,6 +19,7 @@ class User(Base):
     posts = relationship("Post", back_populates="author")
     comments = relationship("Comment", back_populates="author")
     learning_progress = relationship("LearningProgress", back_populates="user")
+    activities = relationship("ActivityLog", back_populates="user")
 
 class Post(Base):
     __tablename__ = "posts"
@@ -96,3 +97,16 @@ class QuizQuestion(Base):
     options = Column(Text, nullable=False)
     category = Column(String(64))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class ActivityLog(Base):
+    __tablename__ = "activity_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    activity_type = Column(String(64), nullable=False)
+    detail = Column(Text, nullable=False)
+    meta_info = Column(Text)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    user = relationship("User", back_populates="activities")

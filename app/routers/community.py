@@ -4,6 +4,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session, joinedload
 from pathlib import Path
 from uuid import uuid4
+from app.activity import record_activity
 from app.database import get_db
 import app.models as models
 import app.schemas as schemas
@@ -67,6 +68,14 @@ async def create_post(
         author_id=current_user.id
     )
     db.add(new_post)
+    db.flush()
+    record_activity(
+        db,
+        current_user.id,
+        "post",
+        f"Nouvelle publication \"{title}\"",
+        {"post_id": new_post.id},
+    )
     db.commit()
     return RedirectResponse(url="/community", status_code=303)
 
@@ -84,5 +93,13 @@ async def add_comment(
         post_id=post_id
     )
     db.add(new_comment)
+    db.flush()
+    record_activity(
+        db,
+        current_user.id,
+        "comment",
+        f"Commentaire ajouté sur le post #{post_id}",
+        {"post_id": post_id},
+    )
     db.commit()
     return RedirectResponse(url="/community", status_code=303)

@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from urllib.parse import parse_qs, urlparse
 from pydantic import BaseModel
 
+from app.activity import record_activity
 from app.database import get_db
 import app.auth as auth
 import app.models as models
@@ -405,6 +406,14 @@ async def start_course(
             completed=False,
         )
         db.add(new_progress)
+        db.flush()
+        record_activity(
+            db,
+            current_user.id,
+            "course_start",
+            f"Début du cours \"{course.title}\"",
+            {"course_id": course.id},
+        )
         db.commit()
 
     return RedirectResponse(url=f"/learning/course/{course_id}", status_code=303)
@@ -497,11 +506,24 @@ async def update_progress(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user),
 ):
+    course = _find_course(db, course_id)
+    if not course:
+        return RedirectResponse(url="/learning", status_code=303)
+
     course_progress = _progress_query(db, current_user.id, course_id).first()
 
     if course_progress:
+        was_completed = bool(course_progress.completed)
         course_progress.progress = progress
         course_progress.completed = progress >= 100
+        if course_progress.completed and not was_completed:
+            record_activity(
+                db,
+                current_user.id,
+                "course_complete",
+                f"Cours \"{course.title}\" complété",
+                {"course_id": course.id},
+            )
         db.commit()
 
     return RedirectResponse(url=f"/learning/course/{course_id}", status_code=303)
@@ -547,6 +569,7 @@ async def update_item_progress(
         models.LearningItemProgress.item_id == payload.item_id,
     ).first()
 
+    was_completed = bool(item_row.completed) if item_row else False
     if not item_row:
         item_row = models.LearningItemProgress(
             user_id=current_user.id,
@@ -557,6 +580,15 @@ async def update_item_progress(
         db.add(item_row)
     else:
         item_row.completed = payload.completed
+
+    if payload.completed and not was_completed:
+        record_activity(
+            db,
+            current_user.id,
+            "course_item",
+            f"Complété {payload.item_id} dans \"{course.title}\"",
+            {"course_id": course.id, "item_id": payload.item_id},
+        )
 
     current_rows = db.query(models.LearningItemProgress).filter(
         models.LearningItemProgress.user_id == current_user.id,
