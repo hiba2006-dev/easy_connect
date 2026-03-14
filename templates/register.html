@@ -1,32 +1,108 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Register - EasyConnect</title>
-<link rel="stylesheet" href="/static/style.css?v=20260309-no-logo">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account — EasyConnect</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body class="auth-page">
 
-<div class="form-container">
-<p class="auth-badge">EasyConnect</p>
-<h2>Register</h2>
-<p class="auth-subtitle">Create your account to get started.</p>
+<div class="auth-container">
 
-<form method="post" action="/auth/register">
-    <input type="text" name="username" placeholder="Username" required>
-    <input type="text" name="full_name" placeholder="Full name (optional)">
-    <input type="email" name="email" placeholder="Email" required>
-    <input type="password" name="password" placeholder="Password" required>
-    <button type="submit">Create account</button>
-</form>
+    <!-- LEFT: Brand panel -->
+    <div class="auth-brand">
+        <div class="auth-brand-logo">
+            <div class="logo-icon">
+                <svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+            </div>
+            <span class="logo-wordmark">EasyConnect</span>
+        </div>
 
-{% if error %}
-<p class="form-error">{{ error }}</p>
-{% endif %}
-<p>Already have an account? <a href="/auth/login">Sign in</a></p>
+        <h2>Join thousands learning ASL today</h2>
+        <p>Free courses, AI feedback, and a professional community to support your progress. Start signing in minutes — no credit card required.</p>
+
+        <div class="auth-features">
+            <div class="auth-feat">
+                <div class="auth-feat-icon">
+                    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <strong>Free to Start</strong>
+                <span>No credit card required, ever</span>
+            </div>
+            <div class="auth-feat">
+                <div class="auth-feat-icon">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2"/></svg>
+                </div>
+                <strong>AI Sign Detection</strong>
+                <span>Live A–Z recognition via camera</span>
+            </div>
+            <div class="auth-feat">
+                <div class="auth-feat-icon">
+                    <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                </div>
+                <strong>Track Progress</strong>
+                <span>Every slide and quiz saved automatically</span>
+            </div>
+            <div class="auth-feat">
+                <div class="auth-feat-icon">
+                    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <strong>Community Support</strong>
+                <span>Post questions, share milestones</span>
+            </div>
+        </div>
+
+        <div class="auth-today">
+            <div class="auth-today-icon">
+                <svg viewBox="0 0 24 24"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>
+            </div>
+            <div>
+                <strong>Today's Sign: "I Love You"</strong>
+                <span>3,241 learners practicing right now</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT: Register form -->
+    <div class="auth-right">
+        <div class="auth-form-box">
+            <h2>Create your account</h2>
+            <p class="auth-subtitle">Start learning ASL right away — it's free.</p>
+
+            <form method="post" action="/auth/register">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input id="username" name="username" type="text"
+                           placeholder="Choose a username" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="full_name">Full name <span style="color:var(--slate-400); font-weight:400;">(optional)</span></label>
+                    <input id="full_name" name="full_name" type="text" placeholder="Your name">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email address</label>
+                    <input id="email" name="email" type="email"
+                           placeholder="you@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input id="password" name="password" type="password"
+                           placeholder="At least 6 characters" required minlength="6">
+                </div>
+                <button type="submit">Create account →</button>
+            </form>
+
+            {% if error %}
+            <div class="form-error" style="margin-top: 14px;">{{ error }}</div>
+            {% endif %}
+
+            <p class="auth-switch">
+                Already have an account? <a href="/auth/login">Sign in</a>
+            </p>
+        </div>
+    </div>
 
 </div>
-
 </body>
 </html>
-
-

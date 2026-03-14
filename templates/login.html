@@ -1,30 +1,354 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Login - EasyConnect</title>
-<link rel="stylesheet" href="/static/style.css?v=20260309-no-logo">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In — EasyConnect</title>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body {
+            height: 100%;
+            min-height: 100vh;
+        }
+
+        body {
+            font-family: "DM Sans", system-ui, sans-serif;
+            font-size: 15px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── LAYOUT ── */
+        .auth-container {
+            display: flex;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        /* ── LEFT BRAND PANEL ── */
+        .auth-brand {
+            flex: 1 1 0%;          /* grows to fill available space */
+            min-width: 0;
+            background: linear-gradient(160deg, #0a2540 0%, #0d2f50 55%, #0a3a6b 100%);
+            color: #fff;
+            padding: 52px 64px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .auth-brand::before {
+            content: '';
+            position: absolute;
+            top: -120px; right: -120px;
+            width: 480px; height: 480px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0,86,210,0.25) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .auth-brand::after {
+            content: '';
+            position: absolute;
+            bottom: -80px; left: -60px;
+            width: 320px; height: 320px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0,86,210,0.12) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        /* Logo */
+        .auth-brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 56px;
+            position: relative;
+            z-index: 1;
+        }
+        .logo-icon {
+            width: 38px; height: 38px;
+            border-radius: 9px;
+            background: #0056d2;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 2px 10px rgba(0,86,210,0.5);
+        }
+        .logo-icon svg {
+            width: 18px; height: 18px;
+            stroke: #fff; stroke-width: 2;
+            fill: none; stroke-linecap: round; stroke-linejoin: round;
+        }
+        .logo-wordmark {
+            font-family: "Source Serif 4", Georgia, serif;
+            font-size: 1.25rem; font-weight: 700;
+            color: #fff; letter-spacing: -0.01em;
+        }
+
+        /* Heading */
+        .auth-brand h2 {
+            font-family: "Source Serif 4", Georgia, serif;
+            font-size: clamp(1.8rem, 3vw, 2.5rem);
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.2;
+            margin-bottom: 16px;
+            max-width: 460px;
+            letter-spacing: -0.02em;
+            position: relative; z-index: 1;
+        }
+        .auth-brand > p {
+            color: rgba(255,255,255,0.62);
+            font-size: 0.95rem;
+            line-height: 1.75;
+            max-width: 440px;
+            margin-bottom: 48px;
+            position: relative; z-index: 1;
+        }
+
+        /* Feature grid */
+        .auth-features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 28px 36px;
+            margin-bottom: 44px;
+            position: relative; z-index: 1;
+        }
+        .auth-feat { display: flex; flex-direction: column; gap: 6px; }
+        .auth-feat-icon {
+            width: 34px; height: 34px;
+            border-radius: 8px;
+            background: rgba(0,86,210,0.25);
+            border: 1px solid rgba(0,86,210,0.35);
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 4px;
+        }
+        .auth-feat-icon svg {
+            width: 15px; height: 15px;
+            stroke: #7bb8ff; stroke-width: 1.75;
+            fill: none; stroke-linecap: round; stroke-linejoin: round;
+        }
+        .auth-feat strong { font-size: 0.88rem; font-weight: 700; color: #fff; }
+        .auth-feat span   { font-size: 0.82rem; color: rgba(255,255,255,0.48); line-height: 1.5; }
+
+        /* ── RIGHT FORM PANEL ── */
+        .auth-right {
+            width: 480px;               /* fixed width */
+            flex-shrink: 0;             /* never shrinks */
+            min-height: 100vh;          /* full height */
+            background: #fff;
+            padding: 52px 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-left: 1px solid #e4e7ec;
+        }
+
+        .auth-form-box { width: 100%; }
+
+        .auth-form-box h2 {
+            font-family: "Source Serif 4", Georgia, serif;
+            font-size: 1.9rem; font-weight: 700;
+            color: #1d2939; margin-bottom: 6px;
+            letter-spacing: -0.02em;
+        }
+        .auth-subtitle { color: #667085; font-size: 0.875rem; margin-bottom: 32px; }
+
+        /* Form */
+        form { display: grid; gap: 16px; }
+
+        .form-group { display: grid; gap: 7px; }
+        .form-group label {
+            font-size: 0.84rem; font-weight: 600;
+            color: #344054;
+        }
+        .forgot-link {
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .forgot-link a {
+            font-size: 0.8rem; font-weight: 600;
+            color: #0056d2; text-decoration: none;
+        }
+        .forgot-link a:hover { text-decoration: underline; }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="email"] {
+            width: 100%;
+            padding: 11px 14px;
+            background: #fff;
+            border: 1.5px solid #c0c9d8;
+            border-radius: 8px;
+            font-family: "DM Sans", sans-serif;
+            font-size: 0.875rem;
+            color: #1d2939;
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+            -webkit-appearance: none;
+        }
+        input::placeholder { color: #98a2b3; }
+        input:hover  { border-color: #98a2b3; }
+        input:focus  {
+            border-color: #0056d2;
+            box-shadow: 0 0 0 3px rgba(0,86,210,0.12);
+        }
+
+        /* Submit button */
+        button[type="submit"] {
+            width: 100%;
+            padding: 12px;
+            background: #0056d2;
+            color: #fff;
+            border: 2px solid #0056d2;
+            border-radius: 8px;
+            font-family: "DM Sans", sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.15s, box-shadow 0.15s, transform 0.15s;
+            letter-spacing: 0.01em;
+            margin-top: 2px;
+        }
+        button[type="submit"]:hover {
+            background: #0047b3;
+            border-color: #0047b3;
+            box-shadow: 0 3px 12px rgba(0,86,210,0.3);
+            transform: translateY(-1px);
+        }
+        button[type="submit"]:active { transform: translateY(0); }
+
+        /* Auth switch */
+        .auth-switch {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 0.875rem;
+            color: #667085;
+        }
+        .auth-switch a { color: #0056d2; font-weight: 700; text-decoration: none; }
+        .auth-switch a:hover { text-decoration: underline; }
+
+        /* Error */
+        .form-error {
+            display: flex; align-items: center; gap: 9px;
+            background: #fef3f2; color: #b42318;
+            border: 1px solid #fecdca;
+            border-radius: 8px;
+            padding: 11px 14px;
+            font-size: 0.875rem; font-weight: 600;
+            margin-top: 14px;
+        }
+
+        /* Legal */
+        .auth-legal {
+            text-align: center;
+            margin-top: 18px;
+            font-size: 0.73rem;
+            color: #98a2b3;
+        }
+        .auth-legal a { font-size: 0.73rem; color: #667085; text-decoration: none; }
+        .auth-legal a:hover { text-decoration: underline; }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 900px) {
+            .auth-container { flex-direction: column; }
+            .auth-brand { padding: 40px 32px; }
+            .auth-brand > h2 { font-size: 1.8rem; }
+            .auth-right {
+                width: 100%;
+                min-height: auto;
+                padding: 40px 28px;
+            }
+            .auth-features { grid-template-columns: 1fr; gap: 20px; }
+        }
+        @media (max-width: 480px) {
+            .auth-brand { padding: 32px 20px; }
+            .auth-right { padding: 32px 20px; }
+            .auth-oauth { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
-<body class="auth-page">
+<body>
 
-<div class="form-container">
-<p class="auth-badge">EasyConnect</p>
-<h2>Login</h2>
-<p class="auth-subtitle">Sign in to access your dashboard.</p>
+<div class="auth-container">
 
-<form method="post" action="/auth/login">
-    <input type="text" name="username" placeholder="Username or email" required>
-    <input type="password" name="password" placeholder="Password" required>
-    <button type="submit">Sign in</button>
-</form>
+    <!-- LEFT: Brand panel -->
+    <div class="auth-brand">
+        <div class="auth-brand-logo">
+            <div class="logo-icon">
+                <svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+            </div>
+            <span class="logo-wordmark">EasyConnect</span>
+        </div>
 
-{% if error %}
-<p class="form-error">{{ error }}</p>
-{% endif %}
-<p>Don't have an account yet? <a href="/auth/register">Create one</a></p>
+        <h2>Start your ASL journey today</h2>
+        <p>Join professionals and dedicated learners advancing in American Sign Language through structured courses, AI-powered feedback, and collaborative practice.</p>
+
+        <div class="auth-features">
+            <div class="auth-feat">
+                <div class="auth-feat-icon">
+                    <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                </div>
+                <strong>200+ Structured Lessons</strong>
+                <span>Comprehensive curriculum from foundational to advanced conversational ASL</span>
+            </div>
+            <div class="auth-feat">
+                <div class="auth-feat-icon">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+                </div>
+                <strong>Real-time Sign Recognition</strong>
+                <span>Precise AI feedback on your signing technique via live camera</span>
+            </div>
+            <div class="auth-feat">
+                <div class="auth-feat-icon">
+                    <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                </div>
+                <strong>Track Professional Progress</strong>
+                <span>Monitor skill development with detailed analytics and milestones</span>
+            </div>
+            <div class="auth-feat">
+                <div class="auth-feat-icon">
+                    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <strong>Professional Community</strong>
+                <span>Connect and practice with serious ASL learners and instructors</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- RIGHT: Form -->
+    <div class="auth-right">
+        <div class="auth-form-box">
+            <h2>Welcome back</h2>
+            <p class="auth-subtitle">Sign in to continue your learning journey</p>
+
+            <form method="post" action="/auth/login">
+                <div class="form-group">
+                    <label for="username">Email address</label>
+                    <input id="username" name="username" type="text"
+                           placeholder="name@example.com" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <div class="forgot-link">
+                        <label for="password">Password</label>
+                        
+                    </div>
+                    <input id="password" name="password" type="password"
+                           placeholder="Enter your password" required autocomplete="current-password">
+                </div>
+                <button type="submit">Sign in →</button>
+            </form>
+
+            <p class="auth-switch">
+                Don't have an account? <a href="/auth/register">Sign up for free</a>
+            </p>
+
+            <p class="auth-legal">
+                By continuing, you agree to our <a href="/terms">Terms of Service</a> and <a href="/privacy">Privacy Policy</a>.
+            </p>
+        </div>
+    </div>
 
 </div>
-
 </body>
 </html>
-
-

@@ -1,62 +1,98 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Learning - EasyConnect</title>
-<link rel="stylesheet" href="/static/style.css?v=20260309-no-logo">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning — EasyConnect</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
-<body class="learning-page">
-<div class="page-shell learning-shell">
-    <header>
-        <h1>Learning</h1>
-        <div class="top-links">
-            <a href="/dashboard">Dashboard</a>
-            <a href="/community">Community</a>
-            <a href="/quiz">Quiz</a>
-            <a href="/account">Mon compte</a>
-            <a href="/auth/logout">Logout</a>
-        </div>
-    </header>
+<body>
+{% set active_page = 'learning' %}
 
-    <section class="learning-hero">
-        <div>
-            <p class="learning-kicker">Learning</p>
-            <h2>Keep improving your skills</h2>
-            <p class="muted">Choose a course, track your progress, and test AI hand detection.</p>
-        </div>
-        <a class="learning-pill" href="#courses">View courses</a>
-    </section>
+<div class="app-shell">
 
-    <h2 class="section-title" id="courses">Available courses</h2>
-    <div class="cards-grid learning-courses">
-        {% for course in courses %}
-        <div class="card learning-card">
-            <h3>{{ course.title }}</h3>
-            <p class="muted">{{ course.description }}</p>
-            <form method="post" action="/learning/course/{{ course.id }}/start" class="learning-course-form">
-                <button type="submit">Start</button>
-            </form>
-            {% if progress.get(course.id) %}
-            <div class="course-progress">
-                Progress: {{ progress.get(course.id).progress }}%
+    {% include '_sidebar.html' %}
+
+    <div class="main-content">
+
+        <div class="top-bar">
+            <span class="top-bar-title">Learning</span>
+            <div class="top-bar-actions">
+                <a class="btn btn-outline btn-sm" href="/quiz">Take a Quiz</a>
+                <div class="top-bar-user">
+                    <div class="top-bar-avatar">{{ user.username[0]|upper if user else 'U' }}</div>
+                    <span>{{ user.full_name or user.username }}</span>
+                </div>
             </div>
-            {% endif %}
         </div>
-        {% endfor %}
+
+        <div class="page-body">
+
+            <!-- Hero -->
+            <div class="hero-banner" style="margin-bottom:28px;">
+                <div>
+                    <span class="hero-banner-label">Learning</span>
+                    <h2>Keep improving your skills</h2>
+                    <p>Choose a course, track your progress, and test your signing with AI hand detection.</p>
+                </div>
+                <div class="hero-banner-actions">
+                    <a class="btn btn-white" href="#courses">View courses ↓</a>
+                </div>
+            </div>
+
+            <!-- Available Courses -->
+            <h2 class="section-title" id="courses">Available Courses</h2>
+            <div class="grid-3" style="margin-bottom:36px;">
+                {% for course in courses %}
+                <div class="card" style="display:flex;flex-direction:column;gap:12px;">
+                    <div style="width:100%;aspect-ratio:16/9;border-radius:var(--r-md);background:linear-gradient(135deg,var(--navy) 0%,var(--navy-600) 100%);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">
+                        <span style="font-family:'Source Serif 4',Georgia,serif;font-size:1.4rem;font-weight:700;color:rgba(255,255,255,0.25);text-align:center;padding:16px;">{{ course.title[:12] }}</span>
+                    </div>
+                    <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+                        <span style="font-size:0.72rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--blue);">ASL Course</span>
+                        <h3 style="margin-bottom:0;">{{ course.title }}</h3>
+                        <p>{{ course.description }}</p>
+                        {% if progress.get(course.id) %}
+                        <div>
+                            <div style="display:flex;justify-content:space-between;font-size:0.76rem;color:var(--gray-500);margin-bottom:5px;">
+                                <span>Progress</span>
+                                <strong style="color:var(--blue);">{{ progress.get(course.id).progress }}%</strong>
+                            </div>
+                            <div class="progress-bar"><div class="progress-fill" style="width:{{ progress.get(course.id).progress }}%;"></div></div>
+                        </div>
+                        {% endif %}
+                        <form method="post" action="/learning/course/{{ course.id }}/start" style="margin-top:auto;padding-top:8px;">
+                            <button type="submit" class="btn btn-full {% if not progress.get(course.id) %}btn-outline{% endif %}">
+                                {% if progress.get(course.id) %}▶ Resume Course{% else %}Start Course →{% endif %}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% else %}
+                <div class="card" style="grid-column:1/-1;text-align:center;padding:48px 24px;">
+                    <p class="muted">No courses available yet. Check back soon!</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- AI Sign Detection -->
+            <h2 class="section-title">AI Sign Detection</h2>
+            <div class="panel stack">
+                <p style="color:var(--gray-600);font-size:0.9rem;">Real-time A–Z detection. Capture a few samples for each letter to calibrate, then run live prediction.</p>
+                <div class="ai-camera-wrap">
+                    <video id="camera" autoplay playsinline></video>
+                    <canvas id="camera-overlay"></canvas>
+                </div>
+                <p id="ai-result" class="ai-result">Detected sign: --</p>
+                <div class="inline">
+                    <button id="start-detection" type="button">▶ Start Camera</button>
+                    <button id="stop-detection" type="button" class="btn-soft">■ Stop</button>
+                </div>
+            </div>
+
+        </div>
     </div>
 
-    <h2 class="section-title">AI Detection</h2>
-    <div class="panel stack learning-ai-panel">
-        <p class="muted">A-Z detection by calibration: capture a few samples for each letter, then run live prediction.</p>
-        <div class="ai-camera-wrap">
-            <video id="camera" autoplay playsinline></video>
-            <canvas id="camera-overlay"></canvas>
-        </div>
-        <p id="ai-result" class="ai-result">Detected sign: --</p>
-        <div class="inline">
-            <button id="start-detection" type="button">Start camera</button>
-            <button id="stop-detection" type="button" class="btn-soft">Stop</button>
-        </div>
-    </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
@@ -64,4 +100,3 @@
 <script src="/static/asl_detection.js?v=20260222-azcalib-global"></script>
 </body>
 </html>
-

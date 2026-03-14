@@ -561,11 +561,9 @@ def seed_community_demo_data() -> None:
 
 
 def seed_quiz_questions() -> None:
-    with engine.begin() as conn:
-        existing_prompts = {
-            row[0] for row in conn.execute(text("SELECT prompt FROM quiz_questions")).fetchall()
-        }
-        if len(existing_prompts) >= len(DEFAULT_QUIZ_QUESTIONS):
+   with engine.begin() as conn:
+        count = conn.execute(text("SELECT COUNT(*) FROM quiz_questions")).scalar() or 0
+        if count > 0:
             return
 
         for question in DEFAULT_QUIZ_QUESTIONS:
