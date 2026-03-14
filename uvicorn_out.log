@@ -1,2 +1,0 @@
-INFO:     127.0.0.1:50564 - "GET /auth/login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50564 - "POST /auth/register HTTP/1.1" 500 Internal Server Error

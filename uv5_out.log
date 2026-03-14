@@ -1,2 +1,0 @@
-INFO:     127.0.0.1:53898 - "POST /auth/login HTTP/1.1" 303 See Other
-INFO:     127.0.0.1:53898 - "GET /dashboard HTTP/1.1" 200 OK
