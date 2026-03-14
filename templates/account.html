@@ -1,93 +1,91 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Mon compte - EasyConnect</title>
+    <title>My account - EasyConnect</title>
     <link rel="stylesheet" href="/static/style.css?v=20260309-no-logo">
 </head>
 <body class="account-page">
 <div class="page-shell account-shell">
     <header>
-        <h1>Mon compte</h1>
+        <h1>My account</h1>
         <div class="top-links">
-            <a href="/dashboard">Tableau de bord</a>
-            <a href="/community">Communauté</a>
-            <a href="/learning">Cours</a>
+            <a href="/dashboard">Dashboard</a>
+            <a href="/community">Community</a>
+            <a href="/learning">Courses</a>
             <a href="/quiz">Quiz</a>
-            <a href="/auth/logout">Déconnexion</a>
+            <a href="/auth/logout">Logout</a>
         </div>
     </header>
 
     <section class="panel stack admin-section">
-        <h2 class="section-title">Gestion des informations utilisateur</h2>
+        <h2 class="section-title">User information</h2>
         <p class="muted">
-            Vous pouvez mettre à jour votre nom complet, votre adresse e-mail ou votre mot de passe. Chaque changement
-            est sécurisé par votre mot de passe actuel.
+            You can update your full name, email address, or password. Each change is protected by your current password.
         </p>
 
         <div class="panel">
-            <h3>Informations de profil</h3>
+            <h3>Profile details</h3>
             {% if profile_success %}
             <div class="admin-alert admin-alert--success">{{ profile_success }}</div>
             {% elif profile_error %}
             <div class="admin-alert admin-alert--error">{{ profile_error }}</div>
             {% endif %}
             <form method="post" action="/account/profile" class="admin-form">
-                <label>Nom d'utilisateur</label>
+                <label>Username</label>
                 <input type="text" value="{{ user.username }}" readonly>
 
-                <label>Nom complet</label>
-                <input type="text" name="full_name" value="{{ user.full_name or '' }}" placeholder="Ex. Maya Dubois">
+                <label>Full name</label>
+                <input type="text" name="full_name" value="{{ user.full_name or '' }}" placeholder="e.g. Maya Dubois">
 
-                <label>Adresse e-mail</label>
-                <input type="email" name="email" value="{{ user.email }}" required placeholder="vous@example.com">
+                <label>Email address</label>
+                <input type="email" name="email" value="{{ user.email }}" required placeholder="you@example.com">
 
-                <label>Mot de passe actuel</label>
-                <input type="password" name="current_password" required placeholder="Entre votre mot de passe">
+                <label>Current password</label>
+                <input type="password" name="current_password" required placeholder="Enter your password">
 
-                <button type="submit">Mettre à jour mon profil</button>
+                <button type="submit">Update my profile</button>
             </form>
         </div>
 
         <div class="panel">
-            <h3>Changer le mot de passe</h3>
+            <h3>Change password</h3>
             {% if password_success %}
             <div class="admin-alert admin-alert--success">{{ password_success }}</div>
             {% elif password_error %}
             <div class="admin-alert admin-alert--error">{{ password_error }}</div>
             {% endif %}
             <form method="post" action="/account/password" class="admin-form">
-                <label>Mot de passe actuel</label>
-                <input type="password" name="current_password" required placeholder="Mot de passe actuel">
+                <label>Current password</label>
+                <input type="password" name="current_password" required placeholder="Current password">
 
-                <label>Nouveau mot de passe</label>
-                <input type="password" name="new_password" required minlength="6" placeholder="Nouveau mot de passe">
+                <label>New password</label>
+                <input type="password" name="new_password" required minlength="6" placeholder="New password">
 
                 <label>Confirmation</label>
-                <input type="password" name="confirm_password" required minlength="6" placeholder="Confirmez le mot de passe">
+                <input type="password" name="confirm_password" required minlength="6" placeholder="Confirm the password">
 
-                <button type="submit">Enregistrer un nouveau mot de passe</button>
+                <button type="submit">Save new password</button>
             </form>
         </div>
 
         <div class="panel">
-            <h3>Supprimer mon compte</h3>
+            <h3>Delete my account</h3>
             {% if delete_error %}
             <div class="admin-alert admin-alert--error">{{ delete_error }}</div>
             {% endif %}
             <p class="muted">
-                La suppression de votre compte est définitive : vos publications, vos commentaires et votre progression seront
-                effacés. Si vous êtes sûr(e), confirmez en saisissant votre mot de passe.
+                Deleting your account is permanent: your posts, comments, and progress will be removed. If you are sure, confirm by entering your password.
             </p>
             <form method="post" action="/account/delete" class="admin-form">
-                <label>Mot de passe actuel</label>
-                <input type="password" name="current_password" required placeholder="Confirmez avec votre mot de passe">
+                <label>Current password</label>
+                <input type="password" name="current_password" required placeholder="Confirm with your password">
 
-                <button type="submit" class="admin-delete">Supprimer mon compte</button>
+                <button type="submit" class="admin-delete">Delete my account</button>
             </form>
         </div>
 
         <div class="panel">
-            <h3>Historique des activités</h3>
+            <h3>Activity history</h3>
             {% if activities %}
             <div class="admin-list">
                 {% for activity in activities %}
@@ -104,7 +102,7 @@
                 {% endfor %}
             </div>
             {% else %}
-            <p class="muted">Vos actions récentes s’afficheront ici (publications, cours, quiz, etc.).</p>
+            <p class="muted">Your recent actions will appear here (posts, courses, quizzes, etc.).</p>
             {% endif %}
         </div>
     </section>

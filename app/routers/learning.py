@@ -411,7 +411,7 @@ async def start_course(
             db,
             current_user.id,
             "course_start",
-            f"Début du cours \"{course.title}\"",
+            f"Started course \"{course.title}\"",
             {"course_id": course.id},
         )
         db.commit()
@@ -521,7 +521,7 @@ async def update_progress(
                 db,
                 current_user.id,
                 "course_complete",
-                f"Cours \"{course.title}\" complété",
+                f"Course \"{course.title}\" completed",
                 {"course_id": course.id},
             )
         db.commit()
@@ -586,7 +586,7 @@ async def update_item_progress(
             db,
             current_user.id,
             "course_item",
-            f"Complété {payload.item_id} dans \"{course.title}\"",
+            f"Completed {payload.item_id} in \"{course.title}\"",
             {"course_id": course.id, "item_id": payload.item_id},
         )
 

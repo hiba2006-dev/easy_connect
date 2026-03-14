@@ -2,7 +2,7 @@ from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
 from datetime import datetime
 
-# Schémas User
+# User schemas
 class UserBase(BaseModel):
     email: EmailStr
     username: str
@@ -31,7 +31,7 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     username: Optional[str] = None
 
-# Schémas Post
+# Post schemas
 class PostBase(BaseModel):
     title: str
     content: str
@@ -50,7 +50,7 @@ class PostResponse(PostBase):
     class Config:
         from_attributes = True
 
-# Schémas Comment
+# Comment schemas
 class CommentBase(BaseModel):
     content: str
 
@@ -67,7 +67,7 @@ class CommentResponse(CommentBase):
     class Config:
         from_attributes = True
 
-# Schémas Learning
+# Learning schemas
 class LearningProgressBase(BaseModel):
     course_id: str
     progress: int = 0

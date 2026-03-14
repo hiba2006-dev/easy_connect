@@ -160,7 +160,7 @@ async def update_profile(
             request,
             current_user,
             db,
-            profile_error="Mot de passe incorrect. Vérifiez vos informations.",
+            profile_error="Incorrect password. Please check your details.",
         )
 
     normalized_email = email.strip().lower()
@@ -175,7 +175,7 @@ async def update_profile(
                 request,
                 current_user,
                 db,
-                profile_error="Cet e-mail est déjà utilisé par un autre compte.",
+                profile_error="This email is already used by another account.",
             )
         current_user.email = normalized_email
 
@@ -187,7 +187,7 @@ async def update_profile(
         db,
         current_user.id,
         "profile_update",
-        "Profil mis à jour",
+        "Profile updated",
     )
     db.commit()
     db.refresh(current_user)
@@ -196,7 +196,7 @@ async def update_profile(
         request,
         current_user,
         db,
-        profile_success="Profil mis à jour avec succès.",
+        profile_success="Profile updated successfully.",
     )
 
 
@@ -214,21 +214,21 @@ async def change_password(
             request,
             current_user,
             db,
-            password_error="Mot de passe actuel incorrect.",
+            password_error="Current password is incorrect.",
         )
     if new_password != confirm_password:
         return render_account_page(
             request,
             current_user,
             db,
-            password_error="Les nouveaux mots de passe ne correspondent pas.",
+            password_error="The new passwords do not match.",
         )
     if len(new_password) < 6:
         return render_account_page(
             request,
             current_user,
             db,
-            password_error="Le nouveau mot de passe doit contenir au moins 6 caractères.",
+            password_error="The new password must contain at least 6 characters.",
         )
 
     current_user.hashed_password = auth.get_password_hash(new_password)
@@ -237,7 +237,7 @@ async def change_password(
         db,
         current_user.id,
         "password_change",
-        "Mot de passe mis à jour",
+        "Password updated",
     )
     db.commit()
     db.refresh(current_user)
@@ -246,7 +246,7 @@ async def change_password(
         request,
         current_user,
         db,
-        password_success="Mot de passe mis à jour avec succès.",
+        password_success="Password updated successfully.",
     )
 
 
@@ -262,7 +262,7 @@ async def delete_account(
             request,
             current_user,
             db,
-            delete_error="Mot de passe incorrect. La suppression a été annulée.",
+            delete_error="Incorrect password. Deletion was canceled.",
         )
 
     user_post_ids = [

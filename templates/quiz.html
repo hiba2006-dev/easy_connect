@@ -11,7 +11,7 @@
         <div class="top-links">
             <a href="/dashboard">Dashboard</a>
             <a href="/learning">Learning</a>
-            <a href="/account">Mon compte</a>
+            <a href="/account">My account</a>
             <a href="/auth/logout">Logout</a>
         </div>
     </header>
@@ -36,7 +36,7 @@
         <span class="quiz-cake">🎂</span>
         <div>
             <p class="quiz-congrats-title">You did it!</p>
-            <p class="muted">A fun, cute congrats cake pops up once you finish the whole quiz. Celebrate your new milestone!</p>
+            <p class="muted">A fun, cute cake pops up once you finish the whole quiz. Celebrate your new milestone!</p>
         </div>
     </div>
 </div>
@@ -104,7 +104,7 @@ let locked = false;
 
 function renderQuestion() {
     if (!quizData.length) {
-        questionEl.textContent = "Aucune question disponible pour le moment.";
+        questionEl.textContent = "No questions available right now.";
         optionsEl.innerHTML = "";
         return;
     }
@@ -241,7 +241,7 @@ function loadQuizData() {
             const maxDesired = 20;
             if (!raw.length) {
                 quizData = [];
-                questionEl.textContent = "Aucune question disponible pour le moment.";
+                questionEl.textContent = "No questions available right now.";
                 if (congratsEl) congratsEl.hidden = true;
                 return;
             }
@@ -249,7 +249,7 @@ function loadQuizData() {
             const prepared = shuffle(raw).slice(0, targetCount);
             quizData = prepared;
             if (!quizData.length) {
-                questionEl.textContent = "Aucune question disponible pour le moment.";
+                questionEl.textContent = "No questions available right now.";
                 if (congratsEl) congratsEl.hidden = true;
                 return;
             }
@@ -264,7 +264,7 @@ function loadQuizData() {
             renderQuestion();
         })
         .catch(() => {
-            questionEl.textContent = "Impossible de charger les questions.";
+            questionEl.textContent = "Unable to load questions.";
             if (congratsEl) congratsEl.hidden = true;
         });
 }

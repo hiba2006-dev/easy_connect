@@ -19,7 +19,7 @@ DEFAULT_COURSES = [
         "video_url": "https://www.youtube.com/embed/nHtF3bR5Dq4",
     },
     {
-        "title": "Salutations ASL",
+        "title": "ASL Greetings",
         "description": "Essential signs to greet and introduce yourself.",
         "video_url": "https://www.youtube.com/embed/0FcwzMq4iWg",
     },
@@ -414,7 +414,7 @@ def seed_community_demo_data() -> None:
         {
             "username": "admin",
             "email": "admin@easyconnect.local",
-            "full_name": "Administrateur",
+            "full_name": "Administrator",
             "password": "admin12345",
             "is_admin": True,
         },

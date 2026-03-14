@@ -73,7 +73,7 @@ async def create_post(
         db,
         current_user.id,
         "post",
-        f"Nouvelle publication \"{title}\"",
+        f"New post \"{title}\"",
         {"post_id": new_post.id},
     )
     db.commit()
@@ -98,7 +98,7 @@ async def add_comment(
         db,
         current_user.id,
         "comment",
-        f"Commentaire ajouté sur le post #{post_id}",
+        f"Comment added on post #{post_id}",
         {"post_id": post_id},
     )
     db.commit()

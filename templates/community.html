@@ -12,7 +12,7 @@
             <a href="/dashboard">Dashboard</a>
             <a href="/learning">Learning</a>
             <a href="/quiz">Quiz</a>
-            <a href="/account">Mon compte</a>
+            <a href="/account">My account</a>
             <a href="/auth/logout">Logout</a>
         </div>
     </header>
@@ -48,7 +48,7 @@
                     <h3>{{ post.title }}</h3>
                     <p class="post-meta">
                         By {{ post.author.username if post.author else "Anonymous" }}
-                        • {{ post.comments|length }} comment{{ "" if post.comments|length == 1 else "s" }}
+                        - {{ post.comments|length }} comment{{ "" if post.comments|length == 1 else "s" }}
                     </p>
                 </div>
             </div>
@@ -82,4 +82,3 @@
 </div>
 </body>
 </html>
-

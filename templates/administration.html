@@ -9,7 +9,7 @@
     <header>
         <h1>Administration</h1>
         <div class="top-links">
-            <span class="admin-badge">Console admin</span>
+            <span class="admin-badge">Admin console</span>
             <a href="/auth/logout">Logout</a>
         </div>
     </header>
@@ -17,9 +17,9 @@
     <section class="dashboard-hero admin-hero">
         <div>
             <p class="dashboard-kicker">Administration</p>
-            <h2>Gestion complète de la plateforme</h2>
+            <h2>Full platform management</h2>
             <p class="muted">
-                Modifiez les utilisateurs, les cours, les quiz ou les contenus communautaires en un seul endroit.
+                Edit users, courses, quizzes, and community content from one place.
             </p>
         </div>
         <div class="admin-hero-actions">
@@ -38,17 +38,17 @@
         <div class="card stat-card">
             <h3>Members</h3>
             <span class="metric">{{ stats.total_users }}</span>
-            <p class="muted">{{ stats.active_users }} actif·ve·s · {{ stats.inactive_users }} inactif·ve·s</p>
+            <p class="muted">{{ stats.active_users }} active - {{ stats.inactive_users }} inactive</p>
         </div>
         <div class="card stat-card">
             <h3>Community posts</h3>
             <span class="metric">{{ stats.posts }}</span>
-            <p class="muted">{{ stats.comments }} commentaires</p>
+            <p class="muted">{{ stats.comments }} comments</p>
         </div>
         <div class="card stat-card">
             <h3>Learning catalog</h3>
             <span class="metric">{{ stats.courses }}</span>
-            <p class="muted">Cours disponibles</p>
+            <p class="muted">Courses available</p>
         </div>
     </div>
 
@@ -67,60 +67,60 @@
                         </span>
                     </div>
                 {% else %}
-                    <p class="muted">Aucune inscription récente.</p>
+                    <p class="muted">No recent sign-ups.</p>
                 {% endfor %}
             </div>
         </div>
         <div class="card panel">
             <h3>Next steps</h3>
             <ul class="admin-tasks">
-                <li>Crawler les signalements et fermer les comptes inactifs.</li>
-                <li>Réactualiser les parcours d'apprentissage pour refléter les retours.</li>
-                <li>Répondre aux commentaires critiques et encourager la communauté.</li>
+                <li>Review reports and close inactive accounts.</li>
+                <li>Refresh learning paths based on feedback.</li>
+                <li>Reply to critical comments and encourage the community.</li>
             </ul>
         </div>
     </div>
 
     <section class="admin-section admin-grid">
         <div class="card panel">
-            <h3>Créer un utilisateur</h3>
+            <h3>Create a user</h3>
             <form method="post" action="/admin/users/create" class="admin-form">
                 <input type="email" name="email" placeholder="Email" required>
-                <input type="text" name="username" placeholder="Nom d'utilisateur" required>
-                <input type="text" name="full_name" placeholder="Nom complet">
-                <input type="password" name="password" placeholder="Mot de passe" required>
+                <input type="text" name="username" placeholder="Username" required>
+                <input type="text" name="full_name" placeholder="Full name">
+                <input type="password" name="password" placeholder="Password" required>
                 <label class="admin-checkbox">
-                    <input type="checkbox" name="is_active" checked> Actif·ve
+                    <input type="checkbox" name="is_active" checked> Active
                 </label>
                 <label class="admin-checkbox">
                     <input type="checkbox" name="is_admin"> Admin
                 </label>
-                <button type="submit">Ajouter un utilisateur</button>
+                <button type="submit">Add user</button>
             </form>
         </div>
         <div class="card panel">
-            <h3>Utilisateurs enregistrés</h3>
+            <h3>Registered users</h3>
             <div class="admin-list">
                 {% for target in users %}
                     <div class="admin-list-row">
                         <div>
                             <strong>{{ target.username }}</strong>
-                            <p class="muted">{{ target.email }} · {{ target.full_name or "—" }}</p>
+                            <p class="muted">{{ target.email }} - {{ target.full_name or "-" }}</p>
                         </div>
                         <form method="post" action="/admin/users/{{ target.id }}/update" class="admin-inline-form">
-                            <input type="text" name="full_name" value="{{ target.full_name or '' }}" placeholder="Nom complet">
+                            <input type="text" name="full_name" value="{{ target.full_name or '' }}" placeholder="Full name">
                             <label class="admin-checkbox">
-                                <input type="checkbox" name="is_active" {% if target.is_active %}checked{% endif %}> Actif·ve
+                                <input type="checkbox" name="is_active" {% if target.is_active %}checked{% endif %}> Active
                             </label>
                             <label class="admin-checkbox">
                                 <input type="checkbox" name="is_admin" {% if target.is_admin %}checked{% endif %}> Admin
                             </label>
-                            <input type="password" name="password" placeholder="Nouveau mot de passe">
-                            <button type="submit">Sauvegarder</button>
+                            <input type="password" name="password" placeholder="New password">
+                            <button type="submit">Save</button>
                         </form>
                         {% if user.id != target.id %}
                         <form method="post" action="/admin/users/{{ target.id }}/delete">
-                            <button type="submit" class="admin-delete">Supprimer</button>
+                            <button type="submit" class="admin-delete">Delete</button>
                         </form>
                         {% endif %}
                     </div>
@@ -131,31 +131,31 @@
 
     <section class="admin-section admin-grid">
         <div class="card panel">
-            <h3>Créer un cours</h3>
+            <h3>Create a course</h3>
             <form method="post" action="/admin/courses/create" class="admin-form">
-                <input type="text" name="title" placeholder="Titre" required>
+                <input type="text" name="title" placeholder="Title" required>
                 <textarea name="description" placeholder="Description"></textarea>
-                <input type="text" name="video_url" placeholder="URL de la vidéo">
-                <button type="submit">Ajouter un cours</button>
+                <input type="text" name="video_url" placeholder="Video URL">
+                <button type="submit">Add course</button>
             </form>
         </div>
         <div class="card panel">
-            <h3>Gérer les cours</h3>
+            <h3>Manage courses</h3>
             <div class="admin-list">
                 {% for course in courses %}
                     <div class="admin-list-row">
                         <div>
                             <strong>{{ course.title }}</strong>
-                            <p class="muted">{{ course.description or "—" }}</p>
+                            <p class="muted">{{ course.description or "-" }}</p>
                         </div>
                         <form method="post" action="/admin/courses/{{ course.id }}/update" class="admin-inline-form">
-                            <input type="text" name="title" value="{{ course.title }}" placeholder="Titre">
+                            <input type="text" name="title" value="{{ course.title }}" placeholder="Title">
                             <textarea name="description" placeholder="Description">{{ course.description or '' }}</textarea>
-                            <input type="text" name="video_url" value="{{ course.video_url or '' }}" placeholder="URL de la vidéo">
-                            <button type="submit">Sauvegarder</button>
+                            <input type="text" name="video_url" value="{{ course.video_url or '' }}" placeholder="Video URL">
+                            <button type="submit">Save</button>
                         </form>
                         <form method="post" action="/admin/courses/{{ course.id }}/delete">
-                            <button type="submit" class="admin-delete">Supprimer</button>
+                            <button type="submit" class="admin-delete">Delete</button>
                         </form>
                     </div>
                 {% endfor %}
@@ -165,32 +165,32 @@
 
     <section class="admin-section admin-grid">
         <div class="card panel">
-            <h3>Modération des publications</h3>
+            <h3>Post moderation</h3>
             <div class="admin-list">
                 {% for post in posts %}
                     <div class="admin-list-row">
                         <div>
                             <strong>{{ post.title }}</strong>
-                            <p class="muted">par {{ post.author.username }} · {{ post.created_at }}</p>
+                            <p class="muted">by {{ post.author.username }} - {{ post.created_at }}</p>
                         </div>
                         <form method="post" action="/admin/posts/{{ post.id }}/delete">
-                            <button type="submit" class="admin-delete">Supprimer</button>
+                            <button type="submit" class="admin-delete">Delete</button>
                         </form>
                     </div>
                 {% endfor %}
             </div>
         </div>
         <div class="card panel">
-            <h3>Modération des commentaires</h3>
+            <h3>Comment moderation</h3>
             <div class="admin-list">
                 {% for comment in comments %}
                     <div class="admin-list-row">
                         <div>
                             <strong>{{ comment.author.username }}</strong>
-                            <p class="muted">{{ comment.content }} · {{ comment.post.title }}</p>
+                            <p class="muted">{{ comment.content }} - {{ comment.post.title }}</p>
                         </div>
                         <form method="post" action="/admin/comments/{{ comment.id }}/delete">
-                            <button type="submit" class="admin-delete">Supprimer</button>
+                            <button type="submit" class="admin-delete">Delete</button>
                         </form>
                     </div>
                 {% endfor %}
@@ -200,56 +200,56 @@
 
     <section class="admin-section admin-grid">
         <div class="card panel">
-            <h3>Ajouter une question de quiz</h3>
+            <h3>Add a quiz question</h3>
             <form method="post" action="/admin/quizzes/create" class="admin-form">
                 <input type="text" name="prompt" placeholder="Question" required>
                 <select name="prompt_type">
-                    <option value="gif_to_label">GIF → label</option>
-                    <option value="label_to_gif">Label → GIF</option>
+                    <option value="gif_to_label">GIF -> label</option>
+                    <option value="label_to_gif">Label -> GIF</option>
                 </select>
-                <input type="text" name="prompt_media" placeholder="URL GIF (optionnel)">
-                <input type="number" name="answer_index" min="0" placeholder="Indice de la bonne réponse" required>
-                <input type="text" name="category" placeholder="Catégorie">
+                <input type="text" name="prompt_media" placeholder="GIF URL (optional)">
+                <input type="number" name="answer_index" min="0" placeholder="Correct answer index" required>
+                <input type="text" name="category" placeholder="Category">
                 {% for idx in range(3) %}
                 <div class="admin-grid admin-quiz-option">
-                    <input type="text" name="option_label_{{ idx }}" placeholder="Libellé option {{ idx + 1 }}">
-                    <input type="text" name="option_gif_{{ idx }}" placeholder="URL GIF option {{ idx + 1 }}">
+                    <input type="text" name="option_label_{{ idx }}" placeholder="Option label {{ idx + 1 }}">
+                    <input type="text" name="option_gif_{{ idx }}" placeholder="Option GIF URL {{ idx + 1 }}">
                 </div>
                 {% endfor %}
-                <button type="submit">Ajouter la question</button>
+                <button type="submit">Add question</button>
             </form>
         </div>
         <div class="card panel">
-            <h3>Questions de quiz existantes</h3>
+            <h3>Existing quiz questions</h3>
             <div class="admin-list">
                 {% for question in quiz_questions %}
                     <div class="admin-list-row">
                         <div>
                             <strong>{{ question.prompt }}</strong>
-                            <p class="muted">{{ question.category or "Global" }} · {{ question.prompt_type }}</p>
+                            <p class="muted">{{ question.category or "Global" }} - {{ question.prompt_type }}</p>
                         </div>
                         <form method="post" action="/admin/quizzes/{{ question.id }}/update" class="admin-inline-form">
                             <input type="text" name="prompt" value="{{ question.prompt }}" placeholder="Question">
                             <select name="prompt_type">
-                                <option value="gif_to_label" {% if question.prompt_type == "gif_to_label" %}selected{% endif %}>GIF → label</option>
-                                <option value="label_to_gif" {% if question.prompt_type == "label_to_gif" %}selected{% endif %}>Label → GIF</option>
+                                <option value="gif_to_label" {% if question.prompt_type == "gif_to_label" %}selected{% endif %}>GIF -> label</option>
+                                <option value="label_to_gif" {% if question.prompt_type == "label_to_gif" %}selected{% endif %}>Label -> GIF</option>
                             </select>
-                            <input type="text" name="prompt_media" value="{{ question.prompt_media or '' }}" placeholder="URL GIF">
+                            <input type="text" name="prompt_media" value="{{ question.prompt_media or '' }}" placeholder="GIF URL">
                             <input type="number" name="answer_index" min="0" value="{{ question.answer_index }}">
-                            <input type="text" name="category" value="{{ question.category or '' }}" placeholder="Catégorie">
+                            <input type="text" name="category" value="{{ question.category or '' }}" placeholder="Category">
                             {% for idx in range(3) %}
                             {% set option = question.options[idx] if question.options|length > idx else {} %}
                             {% set option_label = option.get('label', '') %}
                             {% set option_gif = option.get('gif', '') %}
                             <div class="admin-grid admin-quiz-option">
-                                <input type="text" name="option_label_{{ idx }}" value="{{ option_label }}" placeholder="Libellé">
-                                <input type="text" name="option_gif_{{ idx }}" value="{{ option_gif }}" placeholder="URL GIF">
+                                <input type="text" name="option_label_{{ idx }}" value="{{ option_label }}" placeholder="Label">
+                                <input type="text" name="option_gif_{{ idx }}" value="{{ option_gif }}" placeholder="GIF URL">
                             </div>
                             {% endfor %}
-                            <button type="submit">Mettre à jour</button>
+                            <button type="submit">Update</button>
                         </form>
                         <form method="post" action="/admin/quizzes/{{ question.id }}/delete">
-                            <button type="submit" class="admin-delete">Supprimer</button>
+                            <button type="submit" class="admin-delete">Delete</button>
                         </form>
                     </div>
                 {% endfor %}

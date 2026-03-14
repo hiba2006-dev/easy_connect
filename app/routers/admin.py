@@ -64,7 +64,7 @@ async def create_user(
         )
         .first()
     ):
-        return _redirect(error="Email ou nom d'utilisateur déjà utilisé.")
+        return _redirect(error="Email or username is already in use.")
 
     new_user = models.User(
         email=normalized_email,
@@ -76,7 +76,7 @@ async def create_user(
     )
     db.add(new_user)
     db.commit()
-    return _redirect(message="Utilisateur ajouté.")
+    return _redirect(message="User added.")
 
 
 @router.post("/users/{user_id}/update")
@@ -91,7 +91,7 @@ async def update_user(
 ):
     user = db.get(models.User, user_id)
     if not user:
-        return _redirect(error="Utilisateur introuvable.")
+        return _redirect(error="User not found.")
 
     if full_name is not None:
         user.full_name = full_name.strip() or None
@@ -100,7 +100,7 @@ async def update_user(
     user.is_active = _bool_from_form(is_active)
     user.is_admin = _bool_from_form(is_admin)
     db.commit()
-    return _redirect(message="Utilisateur mis à jour.")
+    return _redirect(message="User updated.")
 
 
 @router.post("/users/{user_id}/delete")
@@ -111,16 +111,16 @@ async def delete_user(
 ):
     user = db.get(models.User, user_id)
     if not user:
-        return _redirect(error="Utilisateur introuvable.")
+        return _redirect(error="User not found.")
     if user.id == current_admin.id:
-        return _redirect(error="Vous ne pouvez pas supprimer votre propre compte.")
+        return _redirect(error="You cannot delete your own account.")
     if user.is_admin:
         admin_count = db.query(models.User).filter(models.User.is_admin == True).count()
         if admin_count <= 1:
-            return _redirect(error="Au moins un administrateur doit rester.")
+            return _redirect(error="At least one administrator must remain.")
     db.delete(user)
     db.commit()
-    return _redirect(message="Utilisateur supprimé.")
+    return _redirect(message="User deleted.")
 
 
 @router.post("/courses/create")
@@ -133,7 +133,7 @@ async def create_course(
 ):
     normalized_title = title.strip()
     if not normalized_title:
-        return _redirect(error="Le titre du cours est requis.")
+        return _redirect(error="Course title is required.")
 
     db.add(
         models.Course(
@@ -143,7 +143,7 @@ async def create_course(
         )
     )
     db.commit()
-    return _redirect(message="Cours créé.")
+    return _redirect(message="Course created.")
 
 
 @router.post("/courses/{course_id}/update")
@@ -157,12 +157,12 @@ async def update_course(
 ):
     course = db.get(models.Course, course_id)
     if not course:
-        return _redirect(error="Cours introuvable.")
+        return _redirect(error="Course not found.")
     course.title = title.strip()
     course.description = description.strip() if description else None
     course.video_url = video_url.strip() if video_url else None
     db.commit()
-    return _redirect(message="Cours mis à jour.")
+    return _redirect(message="Course updated.")
 
 
 @router.post("/courses/{course_id}/delete")
@@ -173,10 +173,10 @@ async def delete_course(
 ):
     course = db.get(models.Course, course_id)
     if not course:
-        return _redirect(error="Cours introuvable.")
+        return _redirect(error="Course not found.")
     db.delete(course)
     db.commit()
-    return _redirect(message="Cours supprimé.")
+    return _redirect(message="Course deleted.")
 
 
 @router.post("/posts/{post_id}/delete")
@@ -187,10 +187,10 @@ async def delete_post(
 ):
     post = db.get(models.Post, post_id)
     if not post:
-        return _redirect(error="Publication introuvable.")
+        return _redirect(error="Post not found.")
     db.delete(post)
     db.commit()
-    return _redirect(message="Publication supprimée.")
+    return _redirect(message="Post deleted.")
 
 
 @router.post("/comments/{comment_id}/delete")
@@ -201,10 +201,10 @@ async def delete_comment(
 ):
     comment = db.get(models.Comment, comment_id)
     if not comment:
-        return _redirect(error="Commentaire introuvable.")
+        return _redirect(error="Comment not found.")
     db.delete(comment)
     db.commit()
-    return _redirect(message="Commentaire supprimé.")
+    return _redirect(message="Comment deleted.")
 
 
 @router.post("/quizzes/create")
@@ -224,7 +224,7 @@ async def create_quiz(
     _: models.User = Depends(_admin_user),
 ):
     if prompt_type not in ("gif_to_label", "label_to_gif"):
-        return _redirect(error="Type de quiz invalide.")
+        return _redirect(error="Invalid quiz type.")
 
     options = _collect_quiz_options(
         [
@@ -234,9 +234,9 @@ async def create_quiz(
         ]
     )
     if len(options) < 2:
-        return _redirect(error="Au moins deux options sont nécessaires.")
+        return _redirect(error="At least two options are required.")
     if not (0 <= answer_index < len(options)):
-        return _redirect(error="Index de réponse invalide.")
+        return _redirect(error="Invalid answer index.")
 
     question = models.QuizQuestion(
         prompt=prompt.strip(),
@@ -248,7 +248,7 @@ async def create_quiz(
     )
     db.add(question)
     db.commit()
-    return _redirect(message="Question ajoutée.")
+    return _redirect(message="Question added.")
 
 
 @router.post("/quizzes/{quiz_id}/update")
@@ -270,9 +270,9 @@ async def update_quiz(
 ):
     question = db.get(models.QuizQuestion, quiz_id)
     if not question:
-        return _redirect(error="Question introuvable.")
+        return _redirect(error="Question not found.")
     if prompt_type not in ("gif_to_label", "label_to_gif"):
-        return _redirect(error="Type de quiz invalide.")
+        return _redirect(error="Invalid quiz type.")
 
     options = _collect_quiz_options(
         [
@@ -282,9 +282,9 @@ async def update_quiz(
         ]
     )
     if len(options) < 2:
-        return _redirect(error="Au moins deux options sont nécessaires.")
+        return _redirect(error="At least two options are required.")
     if not (0 <= answer_index < len(options)):
-        return _redirect(error="Index de réponse invalide.")
+        return _redirect(error="Invalid answer index.")
 
     question.prompt = prompt.strip()
     question.prompt_type = prompt_type
@@ -293,7 +293,7 @@ async def update_quiz(
     question.category = category.strip() if category else None
     question.options = json.dumps(options, ensure_ascii=False)
     db.commit()
-    return _redirect(message="Question mise à jour.")
+    return _redirect(message="Question updated.")
 
 
 @router.post("/quizzes/{quiz_id}/delete")
@@ -304,7 +304,7 @@ async def delete_quiz(
 ):
     question = db.get(models.QuizQuestion, quiz_id)
     if not question:
-        return _redirect(error="Question introuvable.")
+        return _redirect(error="Question not found.")
     db.delete(question)
     db.commit()
-    return _redirect(message="Question supprimée.")
+    return _redirect(message="Question deleted.")

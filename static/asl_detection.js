@@ -25,7 +25,7 @@
         return;
     }
 
-    // ✅ FIX: Appliquer le miroir CSS sur vidéo ET canvas
+    // Mirror both the video and canvas so movement stays consistent
     video.style.transform = "scaleX(-1)";
     canvas.style.transform = "scaleX(-1)";
 
@@ -208,7 +208,7 @@
     hands.setOptions({
         maxNumHands: 1,
         modelComplexity: 0,
-        selfieMode: false, // ✅ FIX: désactivé, le miroir est géré par CSS
+        selfieMode: false, // Mirror handled by CSS, so keep selfieMode off
         minDetectionConfidence: 0.35,
         minTrackingConfidence: 0.35,
     });
@@ -328,7 +328,7 @@
     function importSamplesFromObject(parsed) {
         const source = parsed && parsed.data ? parsed.data : parsed;
         if (!source || typeof source !== "object") {
-            throw new Error("Format JSON invalide.");
+            throw new Error("Invalid JSON format.");
         }
 
         const next = {};

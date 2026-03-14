@@ -18,6 +18,7 @@ class QuizCompletionPayload(BaseModel):
     total: int
     percent: int
 
+
 router = APIRouter(prefix="/api/quiz", tags=["quiz"])
 
 
@@ -31,7 +32,7 @@ async def complete_quiz(
         db,
         current_user.id,
         "quiz_completion",
-        f"Quiz terminé {payload.score}/{payload.total} ({payload.percent}%)",
+        f"Quiz completed {payload.score}/{payload.total} ({payload.percent}%)",
         {"score": payload.score, "total": payload.total, "percent": payload.percent},
     )
     db.commit()
