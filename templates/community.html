@@ -1,84 +1,109 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Community - EasyConnect</title>
-<link rel="stylesheet" href="/static/style.css?v=20260309-no-logo">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community — EasyConnect</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
-<body class="community-page">
-<div class="page-shell community-shell">
-    <header>
-        <h1>Community Space</h1>
-        <div class="top-links">
-            <a href="/dashboard">Dashboard</a>
-            <a href="/learning">Learning</a>
-            <a href="/quiz">Quiz</a>
-            <a href="/account">My account</a>
-            <a href="/auth/logout">Logout</a>
-        </div>
-    </header>
+<body>
+{% set active_page = 'community' %}
 
-    <section class="community-hero">
-        <div>
-            <p class="community-kicker">Community</p>
-            <h2>Share your ideas</h2>
-            <p class="muted">Post, comment, and collaborate with other members.</p>
-        </div>
-        <a class="community-pill" href="#new-post">Write a post</a>
-    </section>
+<div class="app-shell">
 
-    <h2 class="section-title" id="new-post">New post</h2>
-    <div class="panel community-compose">
-        <form method="post" action="/community/posts/create" enctype="multipart/form-data" class="community-compose-form">
-            <input type="text" name="title" placeholder="Post title" required>
-            <textarea name="content" placeholder="Write your message..." required></textarea>
-            <input type="file" name="image" accept="image/*">
-            <button type="submit">Publish</button>
-        </form>
-    </div>
+    {% include '_sidebar.html' %}
 
-    <h2 class="section-title">Recent posts</h2>
-    <div class="posts-list community-feed">
-        {% for post in posts %}
-        <article class="post-item community-post">
-            <div class="community-post-head">
-                <div class="community-avatar">
-                    {{ (post.author.username[0] if post.author and post.author.username else "A") | upper }}
-                </div>
-                <div>
-                    <h3>{{ post.title }}</h3>
-                    <p class="post-meta">
-                        By {{ post.author.username if post.author else "Anonymous" }}
-                        - {{ post.comments|length }} comment{{ "" if post.comments|length == 1 else "s" }}
-                    </p>
+    <div class="main-content">
+
+        <div class="top-bar">
+            <span class="top-bar-title">Community</span>
+            <div class="top-bar-actions">
+                <a class="btn btn-sm" href="#new-post">+ Write a post</a>
+                <div class="top-bar-user">
+                    <div class="top-bar-avatar">{{ user.username[0]|upper if user else 'U' }}</div>
+                    <span>{{ user.full_name or user.username }}</span>
                 </div>
             </div>
-            <p class="community-post-content">{{ post.content }}</p>
-            {% if post.image_url %}
-            <img src="{{ post.image_url }}" alt="Post image" class="community-post-image">
-            {% endif %}
+        </div>
 
-            {% if post.comments %}
-            <div class="community-comments">
-                {% for comment in post.comments|sort(attribute='created_at') %}
-                <div class="community-comment-item">
-                    <span class="community-comment-author">{{ comment.author.username if comment.author else "Anonymous" }}</span>
-                    <p>{{ comment.content }}</p>
+        <div class="page-body">
+
+            <div class="hero-banner" style="margin-bottom:28px;">
+                <div>
+                    <span class="hero-banner-label">Community</span>
+                    <h2>Share, connect &amp; grow together</h2>
+                    <p>Post ideas, ask questions, share milestones, and support fellow ASL learners.</p>
+                </div>
+                <div class="hero-banner-actions">
+                    <a class="btn btn-white" href="#new-post">Write a post</a>
+                </div>
+            </div>
+
+            <h2 class="section-title" id="new-post">New Post</h2>
+            <div class="panel" style="margin-bottom:32px;">
+                <form method="post" action="/community/posts/create" enctype="multipart/form-data" style="gap:14px;">
+                    <div class="form-group">
+                        <label>Post title</label>
+                        <input type="text" name="title" placeholder="Give your post a title" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Content</label>
+                        <textarea name="content" placeholder="Write your message..." required style="min-height:120px;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Attach an image <span style="color:var(--gray-400);font-weight:400;font-size:0.8rem;">(optional)</span></label>
+                        <input type="file" name="image" accept="image/*">
+                    </div>
+                    <div><button type="submit">Publish post</button></div>
+                </form>
+            </div>
+
+            <h2 class="section-title">Recent Posts</h2>
+            <div class="posts-list">
+                {% for post in posts %}
+                <article class="post-item">
+                    <div class="community-post-head">
+                        <div class="community-avatar">
+                            {{ (post.author.username[0] if post.author and post.author.username else "A") | upper }}
+                        </div>
+                        <div style="flex:1;">
+                            <h3 style="font-size:1rem;margin-bottom:3px;font-family:'Source Serif 4',Georgia,serif;font-weight:700;">{{ post.title }}</h3>
+                            <p class="post-meta">
+                                <span style="font-weight:600;color:var(--gray-700);">{{ post.author.username if post.author else "Anonymous" }}</span>
+                                &middot; {{ post.comments|length }} comment{{ "" if post.comments|length == 1 else "s" }}
+                            </p>
+                        </div>
+                    </div>
+                    <p class="community-post-content">{{ post.content }}</p>
+                    {% if post.image_url %}
+                    <img src="{{ post.image_url }}" alt="Post image" class="community-post-image">
+                    {% endif %}
+                    {% if post.comments %}
+                    <div class="community-comments">
+                        {% for comment in post.comments|sort(attribute='created_at') %}
+                        <div class="community-comment-item">
+                            <span class="community-comment-author">{{ comment.author.username if comment.author else "Anonymous" }}</span>
+                            <span>{{ comment.content }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    <form method="post" action="/community/posts/{{ post.id }}/comment" style="display:flex;gap:8px;margin-top:14px;">
+                        <input type="text" name="content" placeholder="Add a comment..." required style="flex:1;">
+                        <button type="submit" class="btn-soft btn-sm">Reply</button>
+                    </form>
+                </article>
+                {% else %}
+                <div class="panel" style="text-align:center;padding:48px 24px;">
+                    <h3 style="margin-bottom:8px;">No posts yet</h3>
+                    <p class="muted">Be the first to share something with the community.</p>
                 </div>
                 {% endfor %}
             </div>
-            {% endif %}
 
-            <form method="post" action="/community/posts/{{ post.id }}/comment" class="stack community-comment-form">
-                <input type="text" name="content" placeholder="Add a comment" required>
-                <button class="btn-soft" type="submit">Comment</button>
-            </form>
-        </article>
-        {% else %}
-        <div class="post-item">
-            <p class="muted">No posts yet.</p>
         </div>
-        {% endfor %}
     </div>
+
 </div>
 </body>
 </html>

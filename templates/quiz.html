@@ -1,150 +1,147 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Quiz - EasyConnect</title>
-<link rel="stylesheet" href="/static/style.css?v=20260309-no-logo">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz — EasyConnect</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
-<body class="quiz-page">
-<div class="page-shell quiz-shell">
-    <header>
-        <h1>Quick Quiz</h1>
-        <div class="top-links">
-            <a href="/dashboard">Dashboard</a>
-            <a href="/learning">Learning</a>
-            <a href="/account">My account</a>
-            <a href="/auth/logout">Logout</a>
-        </div>
-    </header>
+<body>
+{% set active_page = 'quiz' %}
 
-    <section class="quiz-hero">
-        <div>
-            <p class="quiz-kicker">Quiz</p>
-            <h2>Test your knowledge</h2>
-            <p class="muted">Answer the questions and track your score live.</p>
-        </div>
-    </section>
+<div class="app-shell">
 
-    <div class="panel quiz-panel">
-        <p id="quiz-progress" class="muted"></p>
-        <h3 id="quiz-question"></h3>
-        <div id="quiz-options" class="quiz-options"></div>
-        <p id="quiz-feedback" class="quiz-feedback"></p>
-        <button id="quiz-next" type="button" class="btn-soft" style="display:none;">Next question</button>
-        <button id="quiz-restart" type="button" style="display:none;">Restart</button>
-    </div>
-    <div id="quiz-congrats" class="quiz-congrats" hidden>
-        <span class="quiz-cake">🎂</span>
-        <div>
-            <p class="quiz-congrats-title">You did it!</p>
-            <p class="muted">A fun, cute cake pops up once you finish the whole quiz. Celebrate your new milestone!</p>
+    {% include '_sidebar.html' %}
+
+    <div class="main-content">
+
+        <div class="top-bar">
+            <span class="top-bar-title">Quiz</span>
+            <div class="top-bar-actions">
+                <div class="top-bar-user">
+                    <div class="top-bar-avatar">{{ user.username[0]|upper if user else 'U' }}</div>
+                    <span>{{ user.full_name or user.username }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-body">
+
+            <!-- Hero -->
+            <div class="hero-banner" style="margin-bottom:28px;">
+                <div>
+                    <span class="hero-banner-label">Assessment</span>
+                    <h2>Test your ASL knowledge</h2>
+                    <p>Answer sign recognition questions and track your score in real time. Up to 20 questions per session.</p>
+                </div>
+            </div>
+
+            <!-- Quiz panel -->
+            <div class="panel" style="max-width:700px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+                    <p id="quiz-progress" class="muted" style="font-size:0.82rem;"></p>
+                    <span id="quiz-score-badge" class="badge badge-blue" style="display:none;"></span>
+                </div>
+
+                <!-- Progress bar -->
+                <div class="progress-bar" style="margin-bottom:20px;display:none;" id="quiz-progress-bar-wrap">
+                    <div class="progress-fill" id="quiz-progress-bar" style="width:0%;transition:width 0.3s ease;"></div>
+                </div>
+
+                <h3 id="quiz-question" style="font-size:1.1rem;margin-bottom:18px;min-height:28px;"></h3>
+                <div id="quiz-options" class="quiz-options"></div>
+                <p id="quiz-feedback" class="quiz-feedback" style="margin-top:14px;min-height:20px;"></p>
+                <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;">
+                    <button id="quiz-next" type="button" class="btn-soft" style="display:none;">Next question →</button>
+                    <button id="quiz-restart" type="button" style="display:none;">↺ Restart quiz</button>
+                </div>
+            </div>
+
+            <!-- Congrats -->
+            <div id="quiz-congrats" class="quiz-congrats" hidden style="max-width:700px;">
+                <span class="quiz-cake">🎉</span>
+                <div>
+                    <p class="quiz-congrats-title">Quiz complete!</p>
+                    <p class="muted" style="font-size:0.85rem;margin-top:4px;">Great work — your results have been saved.</p>
+                </div>
+            </div>
+
         </div>
     </div>
+
 </div>
 
 <script>
 const assetVersion = Date.now();
-
-function withAssetVersion(url) {
-    if (!url) return url;
-    return `${url}${url.includes("?") ? "&" : "?"}v=${assetVersion}`;
-}
-
-function isVideoMedia(url) {
-    if (!url) return false;
-    const clean = url.split("?")[0].toLowerCase();
-    return clean.endsWith(".mp4") || clean.endsWith(".webm") || clean.endsWith(".ogg");
-}
-
-function toMp4Candidate(url) {
-    if (!url) return url;
-    const clean = url.split("?")[0];
-    if (clean.toLowerCase().endsWith(".mp4")) return withAssetVersion(clean);
-    return withAssetVersion(clean.replace(/\.(gif|png|jpe?g|webp)$/i, ".mp4"));
-}
+function withV(url) { return url ? `${url}${url.includes("?")?"&":"?"}v=${assetVersion}` : url; }
+function isVideo(url) { if (!url) return false; const c=url.split("?")[0].toLowerCase(); return c.endsWith(".mp4")||c.endsWith(".webm")||c.endsWith(".ogg"); }
+function toMp4(url) { if (!url) return url; const c=url.split("?")[0]; return c.toLowerCase().endsWith(".mp4") ? withV(c) : withV(c.replace(/\.(gif|png|jpe?g|webp)$/i,".mp4")); }
 
 function mediaMarkup(url, alt, cssClass) {
-    if (!url) {
-        return `<span class="${cssClass}">${alt}</span>`;
-    }
-    const src = withAssetVersion(url);
-    if (isVideoMedia(url)) {
-        return `<video src="${src}" class="${cssClass}" autoplay loop muted playsinline preload="metadata" aria-label="${alt}"></video>`;
-    }
-    const fallbackMp4 = toMp4Candidate(url);
-    return `<img src="${src}" alt="${alt}" class="${cssClass}" onerror="this.onerror=null; const v=document.createElement('video'); v.className='${cssClass}'; v.src='${fallbackMp4}'; v.autoplay=true; v.loop=true; v.muted=true; v.playsInline=true; this.replaceWith(v);">`;
+    if (!url) return `<span class="${cssClass}">${alt}</span>`;
+    const src = withV(url);
+    if (isVideo(url)) return `<video src="${src}" class="${cssClass}" autoplay loop muted playsinline preload="metadata"></video>`;
+    return `<img src="${src}" alt="${alt}" class="${cssClass}" onerror="this.onerror=null;const v=document.createElement('video');v.className='${cssClass}';v.src='${toMp4(url)}';v.autoplay=v.loop=v.muted=v.playsInline=true;this.replaceWith(v);">`;
 }
 
-function shuffle(arr) {
-    const copy = [...arr];
-    for (let i = copy.length - 1; i > 0; i -= 1) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [copy[i], copy[j]] = [copy[j], copy[i]];
-    }
-    return copy;
+function shuffle(arr) { const c=[...arr]; for(let i=c.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[c[i],c[j]]=[c[j],c[i]];} return c; }
+
+const progressEl   = document.getElementById("quiz-progress");
+const progressBar  = document.getElementById("quiz-progress-bar");
+const progressWrap = document.getElementById("quiz-progress-bar-wrap");
+const scoreBadge   = document.getElementById("quiz-score-badge");
+const questionEl   = document.getElementById("quiz-question");
+const optionsEl    = document.getElementById("quiz-options");
+const feedbackEl   = document.getElementById("quiz-feedback");
+const nextBtn      = document.getElementById("quiz-next");
+const restartBtn   = document.getElementById("quiz-restart");
+const congratsEl   = document.getElementById("quiz-congrats");
+
+let quizData=[], currentIndex=0, score=0, locked=false, finalAnswerReady=false;
+if (congratsEl) congratsEl.hidden = true;
+
+function updateProgressBar() {
+    if (!quizData.length) return;
+    const pct = Math.round(((currentIndex) / quizData.length) * 100);
+    if (progressBar) progressBar.style.width = pct + "%";
+    if (progressWrap) progressWrap.style.display = "block";
 }
-
-const progressEl = document.getElementById("quiz-progress");
-const questionEl = document.getElementById("quiz-question");
-const optionsEl = document.getElementById("quiz-options");
-const feedbackEl = document.getElementById("quiz-feedback");
-const nextBtn = document.getElementById("quiz-next");
-const restartBtn = document.getElementById("quiz-restart");
-const congratsEl = document.getElementById("quiz-congrats");
-
-if (congratsEl) {
-    congratsEl.hidden = true;
-}
-
-let finalAnswerReady = false;
-
-let quizData = [];
-let currentIndex = 0;
-let score = 0;
-let locked = false;
 
 function renderQuestion() {
-    if (!quizData.length) {
-        questionEl.textContent = "No questions available right now.";
-        optionsEl.innerHTML = "";
-        return;
-    }
+    if (!quizData.length) { questionEl.textContent = "No questions available."; return; }
     finalAnswerReady = false;
-    if (congratsEl) {
-        congratsEl.hidden = true;
-    }
-
+    if (congratsEl) congratsEl.hidden = true;
     const item = quizData[currentIndex];
     locked = false;
-    feedbackEl.textContent = "";
-    nextBtn.style.display = "none";
-    restartBtn.style.display = "none";
-    progressEl.textContent = `Question ${currentIndex + 1} / ${quizData.length}`;
+    feedbackEl.textContent = ""; feedbackEl.className = "quiz-feedback";
+    nextBtn.style.display = "none"; restartBtn.style.display = "none";
+    progressEl.textContent = `Question ${currentIndex + 1} of ${quizData.length}`;
+    scoreBadge.textContent = `Score: ${score}`;
+    scoreBadge.style.display = "inline-flex";
+    updateProgressBar();
     questionEl.textContent = item.prompt;
     optionsEl.innerHTML = "";
 
     if (item.prompt_type === "gif_to_label") {
         if (item.prompt_media) {
-            const visual = document.createElement("div");
-            visual.className = "quiz-prompt-gif";
-            visual.innerHTML = mediaMarkup(item.prompt_media, "ASL gif", "quiz-prompt-gif-img");
-            optionsEl.appendChild(visual);
+            const v = document.createElement("div");
+            v.className = "quiz-prompt-gif";
+            v.innerHTML = mediaMarkup(item.prompt_media, "ASL sign", "quiz-prompt-gif-img");
+            optionsEl.appendChild(v);
         }
-
-        item.options.forEach((opt, index) => {
+        item.options.forEach((opt, idx) => {
             const btn = document.createElement("button");
-            btn.type = "button";
-            btn.className = "quiz-option-btn quiz-option-text";
+            btn.type = "button"; btn.className = "quiz-option-btn quiz-option-text";
             btn.textContent = opt.label;
-            btn.addEventListener("click", () => checkAnswer(index, btn));
+            btn.addEventListener("click", () => checkAnswer(idx, btn));
             optionsEl.appendChild(btn);
         });
     } else {
-        item.options.forEach((opt, index) => {
+        item.options.forEach((opt, idx) => {
             const btn = document.createElement("button");
-            btn.type = "button";
-            btn.className = "quiz-option-btn";
+            btn.type = "button"; btn.className = "quiz-option-btn";
             btn.innerHTML = mediaMarkup(opt.gif, opt.label, "quiz-option-gif");
-            btn.addEventListener("click", () => checkAnswer(index, btn));
+            btn.addEventListener("click", () => checkAnswer(idx, btn));
             optionsEl.appendChild(btn);
         });
     }
@@ -154,122 +151,51 @@ function checkAnswer(selectedIndex, selectedButton) {
     if (locked || !quizData.length) return;
     locked = true;
     const item = quizData[currentIndex];
-    const buttons = optionsEl.querySelectorAll("button");
-
-    buttons.forEach((btn, idx) => {
-        if (idx === item.answer_index) btn.classList.add("correct");
-    });
-
+    optionsEl.querySelectorAll("button").forEach((btn, idx) => { if (idx === item.answer_index) btn.classList.add("correct"); });
     if (selectedIndex === item.answer_index) {
-        score += 1;
-        feedbackEl.textContent = "Correct answer.";
+        score++;
+        feedbackEl.textContent = "✓ Correct!";
         feedbackEl.className = "quiz-feedback success";
     } else {
         selectedButton.classList.add("wrong");
-        feedbackEl.textContent = "Wrong answer.";
+        feedbackEl.textContent = "✗ Incorrect.";
         feedbackEl.className = "quiz-feedback error";
     }
-
+    scoreBadge.textContent = `Score: ${score}`;
     const isLast = currentIndex === quizData.length - 1;
-    nextBtn.textContent = isLast ? "Finish" : "Next question";
-    if (nextBtn) {
-        nextBtn.style.display = "inline-block";
-    }
+    nextBtn.textContent = isLast ? "See results →" : "Next question →";
+    nextBtn.style.display = "inline-flex";
     finalAnswerReady = isLast;
 }
 
 function showResult() {
-    progressEl.textContent = "Quiz completed";
     const pct = Math.round((score / quizData.length) * 100);
-    questionEl.textContent = `Your score: ${score}/${quizData.length} (${pct}%)`;
-    optionsEl.innerHTML = "";
-    feedbackEl.textContent = "";
-    nextBtn.style.display = "none";
-    restartBtn.style.display = "inline-block";
-    if (congratsEl) {
-        congratsEl.hidden = false;
-    }
+    if (progressBar) progressBar.style.width = "100%";
+    progressEl.textContent = "Quiz completed";
+    questionEl.textContent = `Your score: ${score} / ${quizData.length} (${pct}%)`;
+    optionsEl.innerHTML = ""; feedbackEl.textContent = "";
+    nextBtn.style.display = "none"; restartBtn.style.display = "inline-flex";
+    if (congratsEl) congratsEl.hidden = false;
     notifyQuizCompletion(score, quizData.length, pct);
 }
 
-
-async function notifyQuizCompletion(scoreValue, totalValue, percentValue) {
-    if (!totalValue) return;
-    try {
-        await fetch("/api/quiz/complete", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                score: scoreValue,
-                total: totalValue,
-                percent: percentValue,
-            }),
-        });
-    } catch (err) {
-        // No action needed; activity logging is best-effort.
-    }
+async function notifyQuizCompletion(s, t, p) {
+    if (!t) return;
+    try { await fetch("/api/quiz/complete", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({score:s,total:t,percent:p}) }); } catch (_) {}
 }
 
-nextBtn.addEventListener("click", () => {
-    if (finalAnswerReady) {
-        showResult();
-        return;
-    }
-    if (currentIndex < quizData.length - 1) {
-        currentIndex += 1;
+nextBtn.addEventListener("click", () => { if (finalAnswerReady) { showResult(); return; } if (currentIndex < quizData.length-1) { currentIndex++; renderQuestion(); } });
+restartBtn.addEventListener("click", () => { currentIndex=0; score=0; quizData=shuffle(quizData); if (congratsEl) congratsEl.hidden=true; renderQuestion(); });
+
+fetch("/api/quiz/questions")
+    .then(r => r.json())
+    .then(data => {
+        const raw = Array.isArray(data.questions) ? data.questions : [];
+        if (!raw.length) { questionEl.textContent = "No questions available yet."; return; }
+        quizData = shuffle(raw).slice(0, 20);
         renderQuestion();
-    }
-});
-
-restartBtn.addEventListener("click", () => {
-    currentIndex = 0;
-    score = 0;
-    quizData = shuffle(quizData);
-    if (congratsEl) {
-        congratsEl.hidden = true;
-    }
-    renderQuestion();
-});
-
-function loadQuizData() {
-    fetch("/api/quiz/questions")
-        .then((res) => res.json())
-        .then((data) => {
-            const raw = Array.isArray(data.questions) ? data.questions : [];
-            const maxDesired = 20;
-            if (!raw.length) {
-                quizData = [];
-                questionEl.textContent = "No questions available right now.";
-                if (congratsEl) congratsEl.hidden = true;
-                return;
-            }
-            const targetCount = Math.min(maxDesired, raw.length);
-            const prepared = shuffle(raw).slice(0, targetCount);
-            quizData = prepared;
-            if (!quizData.length) {
-                questionEl.textContent = "No questions available right now.";
-                if (congratsEl) congratsEl.hidden = true;
-                return;
-            }
-            currentIndex = 0;
-            score = 0;
-            locked = false;
-            finalAnswerReady = false;
-            feedbackEl.textContent = "";
-            if (nextBtn) nextBtn.style.display = "none";
-            if (restartBtn) restartBtn.style.display = "none";
-            if (congratsEl) congratsEl.hidden = true;
-            renderQuestion();
-        })
-        .catch(() => {
-            questionEl.textContent = "Unable to load questions.";
-            if (congratsEl) congratsEl.hidden = true;
-        });
-}
-
-loadQuizData();
+    })
+    .catch(() => { questionEl.textContent = "Failed to load questions. Please try again."; });
 </script>
 </body>
 </html>

@@ -1,0 +1,91 @@
+<aside class="sidebar" id="sidebar">
+
+    <a href="/dashboard" class="sidebar-brand">
+        <div class="sidebar-logo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 11V7a2 2 0 1 1 4 0v4"/>
+                <path d="M10 11V6a2 2 0 1 1 4 0v5"/>
+                <path d="M14 11V7a2 2 0 1 1 4 0v6"/>
+                <path d="M6 11c0 5 3 8 6 8s6-3 6-8"/>
+            </svg>
+        </div>
+        <div>
+            <div class="sidebar-brand-name">EasyConnect</div>
+            <div class="sidebar-brand-tagline">ASL Learning Platform</div>
+        </div>
+
+    </a>
+
+    <nav class="sidebar-nav">
+
+        <div class="sidebar-section">Main</div>
+
+        <a href="/dashboard" class="{{ 'active' if active_page == 'dashboard' else '' }}">
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+                <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+                <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+                <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+            </svg>
+            <span class="nav-label">Dashboard</span>
+        </a>
+
+        <a href="/learning" class="{{ 'active' if active_page == 'learning' else '' }}">
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 19.5V5a2 2 0 0 1 2-2h6v18H6a2 2 0 0 1-2-2z"/>
+                <path d="M20 19.5V5a2 2 0 0 0-2-2h-6v18h6a2 2 0 0 0 2-2z"/>
+            </svg>
+            <span class="nav-label">Learning</span>
+        </a>
+
+        <a href="/quiz" class="{{ 'active' if active_page == 'quiz' else '' }}">
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M9 9a3 3 0 1 1 5 2c-1.5 1-2 1.5-2 3"/>
+                <circle cx="12" cy="17" r="1" fill="currentColor"/>
+            </svg>
+            <span class="nav-label">Quiz</span>
+        </a>
+
+        <a href="/community" class="{{ 'active' if active_page == 'community' else '' }}">
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M17 11a4 4 0 1 0 0-8"/>
+                <path d="M2 21v-2a6 6 0 0 1 12 0v2"/>
+                <path d="M16 21v-2a4 4 0 0 0-3-3.8"/>
+            </svg>
+            <span class="nav-label">Community</span>
+        </a>
+
+        {% if user is defined and user.is_admin %}
+        <div class="sidebar-section">Admin</div>
+        <a href="/administration" class="{{ 'active' if active_page == 'admin' else '' }}">
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/>
+                <path d="M9 12l2 2 4-4"/>
+            </svg>
+            <span class="nav-label">Administration</span>
+        </a>
+        {% endif %}
+
+    </nav>
+
+    <div class="sidebar-footer">
+        <a href="/account" class="{{ 'active' if active_page == 'account' else '' }}">
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="7" r="4"/>
+                <path d="M5.5 21a6.5 6.5 0 0 1 13 0"/>
+            </svg>
+            <span class="nav-label">My Account</span>
+        </a>
+        <a href="/auth/logout">
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+            <span class="nav-label">Sign out</span>
+        </a>
+    </div>
+
+</aside>

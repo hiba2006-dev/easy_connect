@@ -1,75 +1,110 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Dashboard - EasyConnect</title>
-    <link rel="stylesheet" href="/static/style.css?v=20260309-no-logo">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — EasyConnect</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
-<body class="dashboard-page">
-<div class="page-shell dashboard-shell">
-    <header>
-        <h1>EasyConnect Dashboard</h1>
-        <div class="top-links">
-            {% if user.is_admin %}
-                <a href="/administration">Administration</a>
-            {% else %}
-                <a href="/community">Community</a>
-                <a href="/learning">Learning</a>
-            {% endif %}
-            <a href="/quiz">Quiz</a>
-            <a href="/account">My account</a>
-            <a href="/auth/logout">Logout</a>
-        </div>
-    </header>
+<body>
+{% set active_page = 'dashboard' %}
 
-    <section class="dashboard-hero">
-        <div>
-            <p class="dashboard-kicker">Dashboard</p>
-            <h2>Welcome {{ user.username }}</h2>
-            <p class="muted">Track your activity and continue your progress.</p>
-        </div>
-        <div class="dashboard-hero-actions">
-            <a class="dashboard-pill" href="/community">New post</a>
-            <a class="dashboard-pill" href="/learning">Continue a course</a>
-        </div>
-    </section>
+<div class="app-shell">
 
-    <div class="stats-grid dashboard-stats">
-        <div class="card stat-card">
-            <h3>Posts</h3>
-            <span class="metric">{{ stats.posts }}</span>
-            <p class="muted">Messages posted in the community.</p>
+    {% include '_sidebar.html' %}
+
+    <div class="main-content">
+
+        <div class="top-bar">
+            <span class="top-bar-title">Dashboard</span>
+            <div class="top-bar-actions">
+                <div class="top-bar-user">
+                    <div class="top-bar-avatar">{{ user.username[0]|upper if user else 'U' }}</div>
+                    <span>{{ user.full_name or user.username }}</span>
+                </div>
+            </div>
         </div>
-        <div class="card stat-card">
-            <h3>Comments</h3>
-            <span class="metric">{{ stats.comments }}</span>
-            <p class="muted">Replies you have added.</p>
-        </div>
-        <div class="card stat-card">
-            <h3>Courses in progress</h3>
-            <span class="metric">{{ stats.courses }}</span>
-            <p class="muted">Courses not completed yet.</p>
+
+        <div class="page-body">
+
+            <!-- Hero -->
+            <div class="hero-banner">
+                <div>
+                    <span class="hero-banner-label">✦ Welcome back</span>
+                    <h2>Good to see you, {{ user.full_name or user.username }}</h2>
+                    <p>Track your activity, continue your courses, and stay connected with the community.</p>
+                    <div class="hero-stats">
+                        <div class="hero-stat"><strong>{{ stats.posts }}</strong> posts</div>
+                        <div class="hero-stat"><strong>{{ stats.comments }}</strong> comments</div>
+                        <div class="hero-stat"><strong>{{ stats.courses }}</strong> courses active</div>
+                    </div>
+                </div>
+                <div class="hero-banner-actions">
+                    <a class="btn btn-white btn-lg" href="/learning">▶ Continue Learning</a>
+                    <a class="btn" href="/community" style="background:rgba(255,255,255,0.12); border-color:rgba(255,255,255,0.25); color:#fff;">Community →</a>
+                </div>
+            </div>
+
+            <!-- Stat cards -->
+            <div class="grid-3" style="margin-bottom:28px;">
+                <div class="card stat-card">
+                    <div class="stat-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    </div>
+                    <span class="stat-label">Community Posts</span>
+                    <span class="stat-value">{{ stats.posts }}</span>
+                    <div class="stat-sub">Messages you've shared</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-icon" style="background:#ecfdf3;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#027a48" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="9" y1="10" x2="15" y2="10"/></svg>
+                    </div>
+                    <span class="stat-label">Comments</span>
+                    <span class="stat-value">{{ stats.comments }}</span>
+                    <div class="stat-sub">Replies you've added</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-icon" style="background:#f3eeff;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5V5a2 2 0 0 1 2-2h6v18H6a2 2 0 0 1-2-2z"/><path d="M20 19.5V5a2 2 0 0 0-2-2h-6v18h6a2 2 0 0 0 2-2z"/></svg>
+                    </div>
+                    <span class="stat-label">Courses in Progress</span>
+                    <span class="stat-value">{{ stats.courses }}</span>
+                    <div class="stat-sub">Courses not completed yet</div>
+                </div>
+            </div>
+
+            <!-- Explore cards -->
+            <h2 class="section-title">Explore</h2>
+            <div class="grid-3">
+                <div class="card" style="border-top: 3px solid var(--blue);">
+                    <div style="width:44px;height:44px;border-radius:var(--r-md);background:var(--blue-soft);display:flex;align-items:center;justify-content:center;margin-bottom:14px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5V5a2 2 0 0 1 2-2h6v18H6a2 2 0 0 1-2-2z"/><path d="M20 19.5V5a2 2 0 0 0-2-2h-6v18h6a2 2 0 0 0 2-2z"/></svg>
+                    </div>
+                    <h3>Learning Courses</h3>
+                    <p>Continue your courses and track your progress through ASL lessons.</p>
+                    <a class="btn btn-outline" href="/learning" style="margin-top:18px;">Continue →</a>
+                </div>
+                <div class="card" style="border-top: 3px solid var(--purple);">
+                    <div style="width:44px;height:44px;border-radius:var(--r-md);background:var(--purple-soft);display:flex;align-items:center;justify-content:center;margin-bottom:14px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9 9a3 3 0 1 1 5 2c-1.5 1-2 1.5-2 3"/><circle cx="12" cy="17" r="1" fill="var(--purple)"/></svg>
+                    </div>
+                    <h3>Quiz</h3>
+                    <p>Practice with quick visual sign recognition questions and track your score.</p>
+                    <a class="btn" href="/quiz" style="margin-top:18px;background:var(--purple);border-color:var(--purple);">Start Quiz →</a>
+                </div>
+                <div class="card" style="border-top: 3px solid var(--success);">
+                    <div style="width:44px;height:44px;border-radius:var(--r-md);background:var(--success-bg);display:flex;align-items:center;justify-content:center;margin-bottom:14px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="4"/><path d="M17 11a4 4 0 1 0 0-8"/><path d="M2 21v-2a6 6 0 0 1 12 0v2"/><path d="M16 21v-2a4 4 0 0 0-3-3.8"/></svg>
+                    </div>
+                    <h3>Community Space</h3>
+                    <p>Post messages, share progress, and interact with fellow ASL learners.</p>
+                    <a class="btn" href="/community" style="margin-top:18px;background:var(--success);border-color:var(--success);">Open →</a>
+                </div>
+            </div>
+
         </div>
     </div>
 
-    <h2 class="section-title">Explore</h2>
-    <div class="features dashboard-features">
-        <div class="card feature-card">
-            <h3>Community space</h3>
-            <p class="muted">Post messages and interact with other members.</p>
-            <a class="dashboard-link" href="/community">Open</a>
-        </div>
-        <div class="card feature-card">
-            <h3>Learning</h3>
-            <p class="muted">Continue your courses and track your progress.</p>
-            <a class="dashboard-link" href="/learning">Continue</a>
-        </div>
-        <div class="card feature-card">
-            <h3>Quiz</h3>
-            <p class="muted">Practice with quick visual questions.</p>
-            <a class="dashboard-link" href="/quiz">Start</a>
-        </div>
-    </div>
 </div>
 </body>
 </html>
-

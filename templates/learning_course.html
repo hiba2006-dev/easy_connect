@@ -1,50 +1,80 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>{{ course.title }} - EasyConnect</title>
-<link rel="stylesheet" href="/static/style.css?v=20260309-no-logo">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ course.title }} — EasyConnect</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
-<body class="learning-page">
-<div class="page-shell learning-shell">
-    <header>
-        <h1>{{ course.title }}</h1>
-        <div class="top-links">
-            <a href="/dashboard">Dashboard</a>
-            <a href="/learning">Learning</a>
-            <a href="/quiz">Quiz</a>
-            <a href="/account">My account</a>
-            <a href="/auth/logout">Logout</a>
-        </div>
-    </header>
+<body>
+{% set active_page = 'learning' %}
 
-    <section class="learning-hero">
-        <div>
-            <p class="learning-kicker">Course</p>
-            <h2>{{ course.title }}</h2>
-            <p class="muted">{{ course.description }}</p>
-        </div>
-        <a class="learning-pill" href="/quiz">Go to quiz</a>
-    </section>
+<div class="app-shell">
 
-    <div class="panel learning-ai-panel">
-        <h3>Your progress</h3>
-        <p class="muted" id="progress-value">Current progress: {{ course_progress.progress }}%</p>
-        <p class="muted">Go through the slides. Progress updates automatically for each viewed step.</p>
+    {% include '_sidebar.html' %}
+
+    <div class="main-content">
+
+        <div class="top-bar">
+            <span class="top-bar-title" style="display:flex;align-items:center;gap:8px;">
+                <a href="/learning" style="color:var(--gray-400);font-size:0.85rem;font-family:'DM Sans',sans-serif;font-weight:400;text-decoration:none;">Learning</a>
+                <span style="color:var(--gray-300);">/</span>
+                <span style="font-family:'Source Serif 4',Georgia,serif;">{{ course.title }}</span>
+            </span>
+            <div class="top-bar-actions">
+                <a class="btn btn-outline btn-sm" href="/quiz">Take the Quiz</a>
+                <div class="top-bar-user">
+                    <div class="top-bar-avatar">{{ user.username[0]|upper if user else 'U' }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-body">
+
+            <!-- Hero -->
+            <div class="hero-banner" style="margin-bottom:28px;">
+                <div>
+                    <span class="hero-banner-label">Course</span>
+                    <h2>{{ course.title }}</h2>
+                    <p>{{ course.description }}</p>
+                </div>
+            </div>
+
+            <!-- Progress card -->
+            <div class="panel" style="margin-bottom:24px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:12px;">
+                    <div>
+                        <h3 style="margin-bottom:3px;">Your Progress</h3>
+                        <p class="muted" style="font-size:0.82rem;">Updates automatically as you move through each step.</p>
+                    </div>
+                    <span id="progress-pct" style="font-family:'Source Serif 4',Georgia,serif;font-size:1.8rem;font-weight:700;color:var(--blue);">{{ course_progress.progress }}%</span>
+                </div>
+                <div class="progress-bar" style="height:10px;">
+                    <div class="progress-fill" id="progress-bar-fill" style="width:{{ course_progress.progress }}%;"></div>
+                </div>
+                <p id="progress-value" class="muted" style="margin-top:8px;font-size:0.8rem;">{{ course_progress.progress }}% complete</p>
+            </div>
+
+            {% if course_items %}
+            <h2 class="section-title">Interactive Path</h2>
+            <div class="panel stack" id="course-slider">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+                    <p class="muted" id="slide-counter" style="font-size:0.82rem;"></p>
+                    <div style="display:flex;gap:4px;" id="slide-dots"></div>
+                </div>
+                <div id="slide-view"></div>
+                <div class="inline" style="margin-top:8px;">
+                    <button type="button" id="slide-prev" class="btn-soft btn-sm">← Previous</button>
+                    <button type="button" id="slide-next" class="btn-sm">Next →</button>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
     </div>
-
-    {% if course_items %}
-    <h2 class="section-title">Interactive Path</h2>
-    <div class="panel stack" id="course-slider">
-        <p class="muted" id="slide-counter"></p>
-        <div id="slide-view"></div>
-        <div class="inline">
-            <button type="button" id="slide-prev" class="btn-soft">Previous</button>
-            <button type="button" id="slide-next">Next</button>
-        </div>
-    </div>
-    {% endif %}
 
 </div>
+
 {% if course_items %}
 <script id="course-items-data" type="application/json">{{ course_items | tojson }}</script>
 {% endif %}
@@ -54,78 +84,54 @@
     if (!dataEl) return;
     const allItems = JSON.parse(dataEl.textContent || "[]");
     const skipSections = new Set(["Lesson", "Practice", "Dialogue", "Exercise", "Sentence"]);
-    const items = Array.isArray(allItems)
-        ? allItems.filter((item) => !skipSections.has(item.section))
-        : [];
-    if (!Array.isArray(items) || items.length === 0) return;
+    const items = Array.isArray(allItems) ? allItems.filter(i => !skipSections.has(i.section)) : [];
+    if (!items.length) return;
 
-    const counterEl = document.getElementById("slide-counter");
-    const viewEl = document.getElementById("slide-view");
-    const prevBtn = document.getElementById("slide-prev");
-    const nextBtn = document.getElementById("slide-next");
-    const progressEl = document.getElementById("progress-value");
+    const counterEl  = document.getElementById("slide-counter");
+    const viewEl     = document.getElementById("slide-view");
+    const prevBtn    = document.getElementById("slide-prev");
+    const nextBtn    = document.getElementById("slide-next");
+    const progressPct= document.getElementById("progress-pct");
+    const progressVal= document.getElementById("progress-value");
+    const progressBar= document.getElementById("progress-bar-fill");
     const nextCourseUrl = "{{ next_course_url }}";
-    const assetVersion = Date.now();
-    const withAssetVersion = (url) => {
-        if (!url) return url;
-        return `${url}${url.includes("?") ? "&" : "?"}v=${assetVersion}`;
-    };
-    const isVideoMedia = (url) => {
-        if (!url) return false;
-        const clean = url.split("?")[0].toLowerCase();
-        return clean.endsWith(".mp4") || clean.endsWith(".webm") || clean.endsWith(".ogg");
-    };
-    const toMp4Candidate = (url) => {
-        if (!url) return url;
-        const clean = url.split("?")[0];
-        if (clean.toLowerCase().endsWith(".mp4")) return withAssetVersion(clean);
-        return withAssetVersion(clean.replace(/\.(gif|png|jpe?g|webp)$/i, ".mp4"));
-    };
+    const assetVersion  = Date.now();
+
+    const withV    = url => url ? `${url}${url.includes("?")?"&":"?"}v=${assetVersion}` : url;
+    const isVideo  = url => { if (!url) return false; const c = url.split("?")[0].toLowerCase(); return c.endsWith(".mp4")||c.endsWith(".webm")||c.endsWith(".ogg"); };
+    const toMp4    = url => { if (!url) return url; const c = url.split("?")[0]; return c.toLowerCase().endsWith(".mp4") ? withV(c) : withV(c.replace(/\.(gif|png|jpe?g|webp)$/i, ".mp4")); };
+
     let currentIndex = 0;
-    const completedSet = new Set(items.filter((i) => i.done).map((i) => i.item_id));
+    const completedSet = new Set(items.filter(i => i.done).map(i => i.item_id));
 
     const renderSlide = async () => {
         const item = items[currentIndex];
-        if (!item || !viewEl || !counterEl || !prevBtn || !nextBtn) return;
-
-        counterEl.textContent = `Step ${currentIndex + 1} / ${items.length} - ${item.section}`;
+        if (!item) return;
+        counterEl.textContent = `Step ${currentIndex + 1} of ${items.length} — ${item.section}`;
         prevBtn.disabled = currentIndex === 0;
         const isLast = currentIndex === items.length - 1;
-        nextBtn.disabled = false;
-        nextBtn.textContent = isLast
-            ? (nextCourseUrl === "/learning" ? "Finish" : "Finish and next course")
-            : "Next";
+        nextBtn.textContent = isLast ? (nextCourseUrl === "/learning" ? "Finish ✓" : "Finish & next →") : "Next →";
 
         let mediaHtml = "";
         if (item.kind === "image" && item.media_url) {
-            const src = withAssetVersion(item.media_url);
-            const fallbackMp4 = toMp4Candidate(item.media_url);
-            mediaHtml = `
-                <div class="learning-slide-media-wrap">
-                    ${
-                        isVideoMedia(item.media_url)
-                            ? `<video class="learning-slide-media" src="${src}" autoplay loop muted playsinline controls></video>`
-                            : `<img class="learning-slide-media" src="${src}" alt="${item.title}" onerror="this.onerror=null; const v=document.createElement('video'); v.className='learning-slide-media'; v.src='${fallbackMp4}'; v.autoplay=true; v.loop=true; v.muted=true; v.playsInline=true; v.controls=true; this.replaceWith(v);">`
-                    }
-                </div>
-            `;
+            const src = withV(item.media_url);
+            const mp4 = toMp4(item.media_url);
+            mediaHtml = `<div class="learning-slide-media-wrap">${
+                isVideo(item.media_url)
+                ? `<video class="learning-slide-media" src="${src}" autoplay loop muted playsinline controls></video>`
+                : `<img class="learning-slide-media" src="${src}" alt="${item.title}" onerror="this.onerror=null;const v=document.createElement('video');v.className='learning-slide-media';v.src='${mp4}';v.autoplay=v.loop=v.muted=v.playsInline=true;v.controls=true;this.replaceWith(v);">`
+            }</div>`;
         } else if (item.kind === "video" && item.media_url) {
-            mediaHtml = `
-                <iframe class="learning-slide-video" src="${item.media_url}" title="ASL slide video"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-                ${item.watch_url ? `<p style="margin-top:10px;"><a href="${item.watch_url}" target="_blank" rel="noopener noreferrer">Open video on YouTube</a></p>` : ""}
-            `;
+            mediaHtml = `<iframe class="learning-slide-video" src="${item.media_url}" title="Lesson video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            ${item.watch_url ? `<p style="margin-top:10px;"><a href="${item.watch_url}" target="_blank" rel="noopener" style="font-size:0.85rem;">Open on YouTube →</a></p>` : ""}`;
         }
 
-        viewEl.innerHTML = `
-            <div class="card learning-card">
-                <p class="muted">${item.section}</p>
-                <h3>${item.title || ""}</h3>
-                <p>${item.text || ""}</p>
-                ${mediaHtml}
-            </div>
-        `;
+        viewEl.innerHTML = `<div class="card" style="border-left:3px solid var(--blue);gap:10px;display:flex;flex-direction:column;">
+            <span style="font-size:0.72rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--blue);">${item.section}</span>
+            <h3 style="margin-bottom:0;">${item.title || ""}</h3>
+            <p>${item.text || ""}</p>
+            ${mediaHtml}
+        </div>`;
 
         if (!completedSet.has(item.item_id)) {
             try {
@@ -137,35 +143,23 @@
                 if (res.ok) {
                     const data = await res.json();
                     completedSet.add(item.item_id);
-                    if (progressEl && typeof data.progress === "number") {
-                        progressEl.textContent = `Current progress: ${data.progress}%`;
+                    if (typeof data.progress === "number") {
+                        if (progressPct) progressPct.textContent = data.progress + "%";
+                        if (progressVal) progressVal.textContent = data.progress + "% complete";
+                        if (progressBar) progressBar.style.width = data.progress + "%";
                     }
                 }
-            } catch (err) {
-                // No UI block: user can continue slides even if save fails temporarily.
-            }
+            } catch (_) {}
         }
     };
 
-    prevBtn?.addEventListener("click", async () => {
-        if (currentIndex > 0) {
-            currentIndex -= 1;
-            await renderSlide();
-        }
-    });
-
-    nextBtn?.addEventListener("click", async () => {
-        if (currentIndex < items.length - 1) {
-            currentIndex += 1;
-            await renderSlide();
-            return;
-        }
+    prevBtn?.addEventListener("click", () => { if (currentIndex > 0) { currentIndex--; renderSlide(); } });
+    nextBtn?.addEventListener("click", () => {
+        if (currentIndex < items.length - 1) { currentIndex++; renderSlide(); return; }
         window.location.href = nextCourseUrl || "/learning";
     });
-
     renderSlide();
 })();
 </script>
 </body>
 </html>
-

@@ -1,111 +1,147 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>My account - EasyConnect</title>
-    <link rel="stylesheet" href="/static/style.css?v=20260309-no-logo">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account — EasyConnect</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
-<body class="account-page">
-<div class="page-shell account-shell">
-    <header>
-        <h1>My account</h1>
-        <div class="top-links">
-            <a href="/dashboard">Dashboard</a>
-            <a href="/community">Community</a>
-            <a href="/learning">Courses</a>
-            <a href="/quiz">Quiz</a>
-            <a href="/auth/logout">Logout</a>
-        </div>
-    </header>
+<body>
+{% set active_page = 'account' %}
 
-    <section class="panel stack admin-section">
-        <h2 class="section-title">User information</h2>
-        <p class="muted">
-            You can update your full name, email address, or password. Each change is protected by your current password.
-        </p>
+<div class="app-shell">
 
-        <div class="panel">
-            <h3>Profile details</h3>
-            {% if profile_success %}
-            <div class="admin-alert admin-alert--success">{{ profile_success }}</div>
-            {% elif profile_error %}
-            <div class="admin-alert admin-alert--error">{{ profile_error }}</div>
-            {% endif %}
-            <form method="post" action="/account/profile" class="admin-form">
-                <label>Username</label>
-                <input type="text" value="{{ user.username }}" readonly>
+    {% include '_sidebar.html' %}
 
-                <label>Full name</label>
-                <input type="text" name="full_name" value="{{ user.full_name or '' }}" placeholder="e.g. Maya Dubois">
+    <div class="main-content">
 
-                <label>Email address</label>
-                <input type="email" name="email" value="{{ user.email }}" required placeholder="you@example.com">
-
-                <label>Current password</label>
-                <input type="password" name="current_password" required placeholder="Enter your password">
-
-                <button type="submit">Update my profile</button>
-            </form>
-        </div>
-
-        <div class="panel">
-            <h3>Change password</h3>
-            {% if password_success %}
-            <div class="admin-alert admin-alert--success">{{ password_success }}</div>
-            {% elif password_error %}
-            <div class="admin-alert admin-alert--error">{{ password_error }}</div>
-            {% endif %}
-            <form method="post" action="/account/password" class="admin-form">
-                <label>Current password</label>
-                <input type="password" name="current_password" required placeholder="Current password">
-
-                <label>New password</label>
-                <input type="password" name="new_password" required minlength="6" placeholder="New password">
-
-                <label>Confirmation</label>
-                <input type="password" name="confirm_password" required minlength="6" placeholder="Confirm the password">
-
-                <button type="submit">Save new password</button>
-            </form>
-        </div>
-
-        <div class="panel">
-            <h3>Delete my account</h3>
-            {% if delete_error %}
-            <div class="admin-alert admin-alert--error">{{ delete_error }}</div>
-            {% endif %}
-            <p class="muted">
-                Deleting your account is permanent: your posts, comments, and progress will be removed. If you are sure, confirm by entering your password.
-            </p>
-            <form method="post" action="/account/delete" class="admin-form">
-                <label>Current password</label>
-                <input type="password" name="current_password" required placeholder="Confirm with your password">
-
-                <button type="submit" class="admin-delete">Delete my account</button>
-            </form>
-        </div>
-
-        <div class="panel">
-            <h3>Activity history</h3>
-            {% if activities %}
-            <div class="admin-list">
-                {% for activity in activities %}
-                <div class="admin-list-row">
-                    <div>
-                        <strong>{{ activity.activity_type.replace("_", " ") | capitalize }}</strong>
-                        <p class="muted" style="margin-top:6px;">{{ activity.detail }}</p>
-                        {% if activity.meta_info %}
-                        <p class="muted" style="font-size:0.78rem;">{{ activity.meta_info }}</p>
-                        {% endif %}
-                    </div>
-                    <span class="muted">{{ activity.created_at.strftime("%d %b %Y %H:%M") }}</span>
+        <div class="top-bar">
+            <span class="top-bar-title">My Account</span>
+            <div class="top-bar-actions">
+                <div class="top-bar-user">
+                    <div class="top-bar-avatar">{{ user.username[0]|upper if user else 'U' }}</div>
+                    <span>{{ user.full_name or user.username }}</span>
                 </div>
-                {% endfor %}
             </div>
-            {% else %}
-            <p class="muted">Your recent actions will appear here (posts, courses, quizzes, etc.).</p>
-            {% endif %}
         </div>
-    </section>
+
+        <div class="page-body">
+
+            <div class="page-header">
+                <h1>Account Settings</h1>
+                <p>Update your profile information, change your password, or manage your account.</p>
+            </div>
+
+            <div class="stack" style="max-width:660px;">
+
+                <!-- Profile Information -->
+                <div class="panel">
+                    <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border);">
+                        <div style="width:56px;height:56px;border-radius:50%;background:var(--blue);color:#fff;font-family:'DM Sans',sans-serif;font-size:1.3rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:3px solid var(--blue-soft);">
+                            {{ user.username[0]|upper if user else 'U' }}
+                        </div>
+                        <div>
+                            <div style="font-family:'Source Serif 4',Georgia,serif;font-size:1.1rem;font-weight:700;color:var(--gray-900);">{{ user.full_name or user.username }}</div>
+                            <div style="font-size:0.85rem;color:var(--gray-500);">{{ user.email }}</div>
+                        </div>
+                    </div>
+                    <h3>Profile Information</h3>
+                    <p style="margin-bottom:18px;">Update your display name and email address.</p>
+                    {% if profile_success %}
+                    <div class="admin-alert--success" style="margin-bottom:16px;">{{ profile_success }}</div>
+                    {% elif profile_error %}
+                    <div class="admin-alert--error" style="margin-bottom:16px;">{{ profile_error }}</div>
+                    {% endif %}
+                    <form method="post" action="/account/profile" class="admin-form">
+                        <div class="form-group">
+                            <label>Username</label>
+                            <input type="text" value="{{ user.username }}" readonly style="background:var(--gray-50);color:var(--gray-400);cursor:not-allowed;">
+                        </div>
+                        <div class="form-group">
+                            <label>Full name</label>
+                            <input type="text" name="full_name" value="{{ user.full_name or '' }}" placeholder="Your full name">
+                        </div>
+                        <div class="form-group">
+                            <label>Email address</label>
+                            <input type="email" name="email" value="{{ user.email }}" required placeholder="you@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Current password <span style="color:var(--gray-400);font-weight:400;font-size:0.8rem;">(required to save changes)</span></label>
+                            <input type="password" name="current_password" required placeholder="Enter your current password">
+                        </div>
+                        <div><button type="submit">Save changes</button></div>
+                    </form>
+                </div>
+
+                <!-- Change Password -->
+                <div class="panel">
+                    <h3>Change Password</h3>
+                    <p style="margin-bottom:18px;">Choose a strong, unique password for your account.</p>
+                    {% if password_success %}
+                    <div class="admin-alert--success" style="margin-bottom:16px;">{{ password_success }}</div>
+                    {% elif password_error %}
+                    <div class="admin-alert--error" style="margin-bottom:16px;">{{ password_error }}</div>
+                    {% endif %}
+                    <form method="post" action="/account/password" class="admin-form">
+                        <div class="form-group">
+                            <label>Current password</label>
+                            <input type="password" name="current_password" required placeholder="Current password">
+                        </div>
+                        <div class="form-group">
+                            <label>New password</label>
+                            <input type="password" name="new_password" required minlength="6" placeholder="New password (min. 6 characters)">
+                        </div>
+                        <div class="form-group">
+                            <label>Confirm new password</label>
+                            <input type="password" name="confirm_password" required minlength="6" placeholder="Confirm new password">
+                        </div>
+                        <div><button type="submit">Update password</button></div>
+                    </form>
+                </div>
+
+                <!-- Activity History -->
+                <div class="panel">
+                    <h3>Activity History</h3>
+                    {% if activities %}
+                    <div class="admin-list" style="margin-top:14px;">
+                        {% for activity in activities %}
+                        <div class="admin-list-row">
+                            <div>
+                                <strong>{{ activity.activity_type.replace("_", " ") | capitalize }}</strong>
+                                <p class="muted" style="margin-top:3px;">{{ activity.detail }}</p>
+                                {% if activity.meta_info %}
+                                <p class="muted" style="font-size:0.75rem;margin-top:2px;">{{ activity.meta_info }}</p>
+                                {% endif %}
+                            </div>
+                            <span class="muted" style="white-space:nowrap;font-size:0.8rem;">{{ activity.created_at.strftime("%d %b %Y, %H:%M") }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="muted" style="margin-top:12px;">Your recent actions will appear here — posts, courses, quizzes, and more.</p>
+                    {% endif %}
+                </div>
+
+                <!-- Danger Zone -->
+                <div class="panel" style="border-color:var(--danger-border);border-left:3px solid var(--danger);">
+                    <h3 style="color:var(--danger);">Delete Account</h3>
+                    <p style="margin-bottom:18px;">This is permanent and cannot be undone. All your posts, comments, and progress will be removed immediately.</p>
+                    {% if delete_error %}
+                    <div class="admin-alert--error" style="margin-bottom:16px;">{{ delete_error }}</div>
+                    {% endif %}
+                    <form method="post" action="/account/delete" class="admin-form">
+                        <div class="form-group">
+                            <label>Confirm with your current password</label>
+                            <input type="password" name="current_password" required placeholder="Enter your password to confirm deletion">
+                        </div>
+                        <div><button type="submit" class="admin-delete">Delete my account permanently</button></div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
 </div>
 </body>
 </html>
