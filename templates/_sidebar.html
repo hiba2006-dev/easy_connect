@@ -89,3 +89,101 @@
     </div>
 
 </aside>
+
+<script>
+// Add a small profile/logout dropdown when clicking the top-bar avatar
+// This script runs after the DOM is ready to ensure top-bar elements exist.
+document.addEventListener('DOMContentLoaded', () => {
+    const topUser = document.querySelector('.top-bar-user');
+    const avatar = document.querySelector('.top-bar-avatar');
+    if (!topUser || !avatar) return;
+
+    topUser.style.cursor = 'pointer';
+
+    const menu = document.createElement('div');
+    menu.className = 'top-bar-user-menu';
+    menu.innerHTML = `
+        <a href="/account" class="menu-item">Mon profil</a>
+        <a href="/auth/logout" class="menu-item danger">Se déconnecter</a>
+    `;
+    document.body.appendChild(menu);
+
+    const style = document.createElement('style');
+    style.textContent = `
+        .top-bar-user-menu {
+            position: absolute;
+            top: 0; left: 0;
+            background: #fff;
+            border: 1px solid rgba(16,24,40,0.12);
+            border-radius: 12px;
+            box-shadow: 0 8px 18px rgba(16,24,40,0.14);
+            min-width: 160px;
+            padding: 8px 0;
+            display: none;
+            z-index: 200;
+            font-size: 0.9rem;
+        }
+        .top-bar-user-menu .menu-item {
+            display: block;
+            padding: 8px 14px;
+            color: #1f2937;
+            text-decoration: none;
+        }
+        .top-bar-user-menu .menu-item:hover {
+            background: rgba(0,0,0,0.04);
+        }
+        .top-bar-user-menu .menu-item.danger {
+            color: #b42318;
+        }
+    `;
+    document.head.appendChild(style);
+
+    const toggleMenu = () => {
+        const rect = topUser.getBoundingClientRect();
+
+        // If already open, close it
+        if (menu.style.display === 'block') {
+            menu.style.display = 'none';
+            return;
+        }
+
+        // Show it invisibly first to measure width/height
+        menu.style.display = 'block';
+        menu.style.visibility = 'hidden';
+
+        const menuWidth = menu.offsetWidth;
+        const menuHeight = menu.offsetHeight;
+        const viewportRight = window.scrollX + window.innerWidth;
+        const viewportBottom = window.scrollY + window.innerHeight;
+
+        // Prefer aligning to the right edge of the top-bar user block
+        let left = rect.right + window.scrollX - menuWidth;
+        // Keep within viewport (8px padding)
+        left = Math.min(left, viewportRight - menuWidth - 8);
+        left = Math.max(left, window.scrollX + 8);
+
+        let top = rect.bottom + window.scrollY + 6;
+        // If it would go off-screen below, place it above the avatar
+        if (top + menuHeight > viewportBottom - 8) {
+            top = rect.top + window.scrollY - menuHeight - 6;
+        }
+
+        menu.style.left = `${left}px`;
+        menu.style.top = `${top}px`;
+        menu.style.visibility = 'visible';
+    };
+
+    avatar.addEventListener('click', (event) => {
+        event.stopPropagation();
+        toggleMenu();
+    });
+
+    document.addEventListener('click', () => {
+        menu.style.display = 'none';
+    });
+
+    menu.addEventListener('click', (event) => {
+        event.stopPropagation();
+    });
+});
+</script>

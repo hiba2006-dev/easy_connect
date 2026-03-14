@@ -196,14 +196,9 @@ def _build_trackable_item_ids(
 ) -> list[str]:
     item_ids: list[str] = []
     item_ids.extend([f"objective_{idx}" for idx, _ in enumerate(course_content.get("objectives", []), start=1)])
-    item_ids.extend([f"lesson_{idx}" for idx, _ in enumerate(course_content.get("lessons", []), start=1)])
-    item_ids.extend([f"practice_{idx}" for idx, _ in enumerate(course_content.get("practice", []), start=1)])
-
     item_ids.extend([f"alphabet_{letter}" for letter in extra_content.get("alphabet", [])])
     item_ids.extend([f"vocab_{_slugify(word)}" for word in extra_content.get("vocabulary", {}).keys()])
     item_ids.extend([f"daily_{_slugify(word)}" for word in extra_content.get("daily_signs", {}).keys()])
-    item_ids.extend([f"dialogue_{idx}" for idx, _ in enumerate(extra_content.get("dialogues", []), start=1)])
-    item_ids.extend([f"sentence_{idx}" for idx, _ in enumerate(extra_content.get("sentences", []), start=1)])
     item_ids.extend([f"video_{idx}" for idx, _ in enumerate(extra_content.get("videos", []), start=1)])
     return item_ids
 
