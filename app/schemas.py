@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 
 # User schemas
@@ -33,19 +33,20 @@ class TokenData(BaseModel):
 
 # Post schemas
 class PostBase(BaseModel):
-    title: str
-    content: str
+    title: Optional[str] = None
+    content: Optional[str] = None
+    image_url: Optional[str] = None
 
 class PostCreate(PostBase):
-    pass
+    title: str
+    content: str
 
 class PostResponse(PostBase):
     id: int
     author_id: int
-    image_url: Optional[str] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
-    author: UserResponse
+    author: 'UserResponse'
     
     class Config:
         from_attributes = True
@@ -62,7 +63,7 @@ class CommentResponse(CommentBase):
     author_id: int
     post_id: int
     created_at: datetime
-    author: UserResponse
+    author: 'UserResponse'
     
     class Config:
         from_attributes = True
@@ -83,3 +84,40 @@ class LearningProgressResponse(LearningProgressBase):
     
     class Config:
         from_attributes = True
+
+# Quiz schemas
+class QuizQuestionBase(BaseModel):
+    prompt: str
+    prompt_media: Optional[str] = None
+    prompt_type: str = 'gif_to_label'
+    answer_index: int
+    options: str  # JSON string
+    category: Optional[str] = None
+
+class QuizQuestionResponse(QuizQuestionBase):
+    id: int
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+# Activity schemas
+class ActivityLogBase(BaseModel):
+    activity_type: str
+    detail: str
+    meta_info: Optional[str] = None
+
+class ActivityLogResponse(ActivityLogBase):
+    id: int
+    user_id: int
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+# Forward refs
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    UserResponse: BaseModel
+    PostResponse: BaseModel
+

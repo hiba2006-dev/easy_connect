@@ -1,0 +1,92 @@
+[33mcommit cb454bf31c61b059d213f541791743c82cc52f43[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: unknown <etudiant1@ests.com>
+Date:   Sat Mar 14 16:44:56 2026 +0000
+
+    mes modifications locales
+
+[33mcommit 2055486de6ed65d74c78dad596b0851ffa6a97a8[m
+Author: unknown <etudiant1@ests.com>
+Date:   Sat Mar 14 14:15:15 2026 +0000
+
+    Complete all items for user 5 and update progress logic
+
+[33mcommit 50994a6f1d43c9d04cc0a5bbdf99515cf3470d1f[m
+Merge: 6745c4a db1bb5d
+Author: unknown <etudiant1@ests.com>
+Date:   Sat Mar 14 12:15:21 2026 +0000
+
+    keep friend's version
+
+[33mcommit 6745c4a31ebced58913bbb67afa99f622c4d12e6[m
+Author: unknown <etudiant1@ests.com>
+Date:   Sat Mar 14 12:13:44 2026 +0000
+
+    mes modifications locales
+
+[33mcommit db1bb5d25d174163f148054e37933924cddf6206[m
+Author: aya <bentounsiayaaya@example.com>
+Date:   Sat Mar 14 03:21:33 2026 +0000
+
+    Modification CSS
+
+[33mcommit 96cfdabb98985930b0b82b0cbbc83783a57351ee[m
+Author: unknown <etudiant1@ests.com>
+Date:   Wed Mar 11 02:15:48 2026 +0000
+
+    modification du projet easy_connect
+
+[33mcommit 4f74bac2248a5d37fefb4a2cba34a81aee93bbe3[m
+Author: unknown <etudiant1@ests.com>
+Date:   Wed Mar 11 01:41:02 2026 +0000
+
+    modification du projet easy_connect
+
+[33mcommit 3b0ce13e12bdc9288556d416e5a9a4a927ca1029[m
+Author: aya <bentounsiayaaya@example.com>
+Date:   Wed Mar 11 00:10:46 2026 +0000
+
+    Modification CSS
+
+[33mcommit 974fc531d1a8523189176d712a6f70600f6c380f[m[33m ([m[1;31morigin/ma-branche[m[33m, [m[1;32mma-branche[m[33m)[m
+Author: aya <bentounsiayaaya@example.com>
+Date:   Tue Mar 10 02:14:55 2026 +0000
+
+    Ajout des nouvelles modifications
+
+[33mcommit ee0ae7a1960692780a013e7e0e87908a9044edea[m
+Author: unknown <etudiant1@ests.com>
+Date:   Mon Mar 9 21:57:49 2026 +0000
+
+    mise à jour du projet
+
+[33mcommit 02b6865cc9ecf2381937bb6ad129d1f4c7c5fc51[m
+Merge: 957ece7 7177595
+Author: unknown <etudiant1@ests.com>
+Date:   Mon Mar 9 00:30:56 2026 +0000
+
+    mise à jour du projet easy_connect
+
+[33mcommit 7177595a032ace6e1f5cfc62c9931cf7a51b1cc7[m
+Author: aya <bentounsiayaaya@example.com>
+Date:   Sun Mar 8 02:12:18 2026 +0000
+
+    Premier commit de mon projet
+
+[33mcommit 957ece7f310b1b261eff22207b9568134b489718[m
+Merge: 4a9b700 fbbfe41
+Author: unknown <etudiant1@ests.com>
+Date:   Sun Feb 22 20:57:31 2026 +0000
+
+    Merge GitHub and local project
+
+[33mcommit 4a9b7009df0482f777461e891f7e26c23674c7ba[m
+Author: unknown <etudiant1@ests.com>
+Date:   Sun Feb 22 20:52:18 2026 +0000
+
+    Ajout du projet easy_connect
+
+[33mcommit fbbfe4180e3e7f4850b5e0516fdc9af6cb91d642[m
+Author: unknown <etudiant1@ests.com>
+Date:   Sun Feb 22 20:37:54 2026 +0000
+
+    appli de asl

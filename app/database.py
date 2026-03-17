@@ -5,7 +5,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-
 def _build_database_url() -> str:
     # MySQL only: this app is configured to use phpMyAdmin/MySQL stack.
     db_driver = os.getenv("DB_DRIVER", "mysql").lower()
@@ -14,11 +13,11 @@ def _build_database_url() -> str:
             "Unsupported DB_DRIVER. This project is configured for MySQL only."
         )
 
-    db_user = os.getenv("MYSQL_USER", "root")
-    db_password = quote_plus(os.getenv("MYSQL_PASSWORD", ""))
-    db_host = os.getenv("MYSQL_HOST", "127.0.0.1")
-    db_port = os.getenv("MYSQL_PORT", "3306")
-    db_name = os.getenv("MYSQL_DB", "easyconnect")
+    db_user = "root"
+    db_password = quote_plus("harbalhiba2006")
+    db_host = "localhost"
+    db_port = "3306"
+    db_name = "easyconnect"
 
     return (
         f"mysql+pymysql://{db_user}:{db_password}@"
@@ -36,10 +35,10 @@ engine = create_engine(
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-
 def get_db():
     db = SessionLocal()
     try:
         yield db
     finally:
         db.close()
+

@@ -561,6 +561,7 @@ def seed_community_demo_data() -> None:
 
 
 def seed_quiz_questions() -> None:
+   existing_prompts = set()
    with engine.begin() as conn:
         count = conn.execute(text("SELECT COUNT(*) FROM quiz_questions")).scalar() or 0
         if count > 0:

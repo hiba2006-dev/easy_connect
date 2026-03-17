@@ -1,0 +1,30 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    restart: always
+    environment:
+      MYSQL_DATABASE: easyconnect
+      MYSQL_ROOT_PASSWORD: harbalhiba2006
+      MYSQL_USER: hiba
+      MYSQL_PASSWORD: harbalhiba2006
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  app:
+    build: .
+    container_name: easyconnect_app
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+
+volumes:
+  db_data:
